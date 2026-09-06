@@ -1,0 +1,60 @@
+# Gestão de Devoluções
+
+Aplicativo interno para registrar, acompanhar e aprovar solicitações de devolução com governança obrigatória da Diretora e do Gerente antes da continuidade operacional.
+
+## Público
+
+Times Comercial e Regional usam a solução somente para cadastrar solicitações e gerar protocolo. Diretora Gabriela e Gerente Tiago usam a solução somente para aprovar ou reprovar. O ADM `devolucao@gruponautika.com.br` acompanha status, setores operacionais, anexos, SLA e indicadores dentro do aplicativo.
+
+## Acesso por perfil
+
+Solicitantes de devolução não visualizam informações administrativas e não acompanham solicitações no app. Para esse perfil, a página inicial exibe somente o formulário de cadastro e, após o envio, gera um número de protocolo para referência. Não aparecem na face do formulário status, aprovações internas, nomes/e-mails de aprovadores, indicadores gerenciais, liberações por setor, anexos, filas operacionais ou mensagens administrativas.
+
+Administrador do fluxo: a conta Microsoft 365 `devolucao@gruponautika.com.br` e qualquer usuário marcado no Dataverse com perfil **Administrador** são reconhecidos como ADM no app. O ADM tem acesso completo às informações do processo em páginas administrativas protegidas e é o responsável por acompanhar o processo com os demais setores após as aprovações obrigatórias. O acesso interno usa exclusivamente a identidade autenticada do Microsoft 365, sem senhas armazenadas no navegador ou incluídas no código. A solicitação de devolução permanece aberta para todos, sem exigir login, e-mail ou senha na face do formulário.
+
+Perfis de aprovação e operação configurados no fluxo: Diretoria — Gabriela (`gabriela@gruponautika.com.br`); Aprovação inicial — Gabriela (`gabriela@gruponautika.com.br`), Tiago (`tiago@gruponautika.com.br`) e ADM (`devolucao@gruponautika.com.br`); Validação NFD — `devolucaofiscal@gruponautika.com.br`, `kaio.morais@gruponautika.com.br` e `silvia.baroni@omniteca.io`; Aprovado — `devolucao@gruponautika.com.br`, `leidiane.morais@gruponautika.com.br` e `victoria.sturaro@gruponautika.com.br`; Coleta — `matheus.calixto@gruponautika.com.br`, `gabriel.vieira@gruponautika.com.br` e `joice.sousa@gruponautika.com.br`; Recebimento — `larissa.correia@gruponautika.com.br` e `recebimento.ntk@gruponautika.com.br`; Entrada da NFD — `fiscal@gruponautika.com.br`, `kaio.morais@gruponautika.com.br` e `silvia.baroni@omniteca.io`; Financeiro — `kaline@gruponautika.com.br` e `financeirocreditoecobranca@gruponautika.com.br`.
+
+## Fluxo principal
+
+Toda solicitação nasce com dados digitados pelo solicitante: nome da empresa, CNPJ, nome do solicitante, responsável regional, NF de origem, valor da nota de devolução e descrição do motivo. Esses campos são gravados de forma estruturada na tabela Dataverse de complemento da devolução, vinculados ao protocolo da solicitação para aprovação, auditoria e indicadores. O solicitante recebe o protocolo gerado e pode buscá-lo posteriormente na página inicial para consultar o andamento. O acompanhamento operacional fica bloqueado e restrito ao ADM até aprovação da Diretora e aprovação do Gerente dentro do aplicativo. Somente depois das aprovações o ADM direciona e acompanha o processo nas filas internas do app com os setores responsáveis; nesse momento o app libera o caminho para anexar a NF de devolução.
+
+## Tratamento no aplicativo
+
+O envio via Microsoft Teams foi cancelado. O fluxo passa a ser tratado integralmente pelo aplicativo, com decisões, comentários, SLA, anexos, histórico e liberação de setores registrados nas páginas internas e no Dataverse.
+
+## Permissões por perfil
+
+O aplicativo aplica autorização centralizada pela identidade Microsoft 365 e pelo perfil ativo no Dataverse. Solicitantes usam formulário e consulta; Diretoria e Gerência acessam apenas aprovações e relatórios; equipes operacionais acessam anexos, refaturamento e tarefas do próprio setor; Administradores acessam configuração, painéis e ações globais. Rotas protegidas são verificadas antes da montagem das páginas para impedir consultas ou gravações no Dataverse por perfis não autorizados. Credenciais ou valores do navegador não substituem a identidade autenticada.
+
+Etapas representadas:
+- **Cadastro e protocolo**: o solicitante preenche o formulário e recebe o protocolo rastreável sem disparo para Teams.
+- **Aprovações internas**: Gabriela, Tiago e ADM aprovam ou reprovam diretamente na página de Aprovações.
+- **Processo por setor no Painel ADM**: o fluxo operacional obrigatório é ADM aprova solicitação → solicitante envia NFD → Validação NFD confere a nota → retorna para aprovação ADM → Transportes registra agendamento de coleta/entrega → Recebimento confere o material → Financeiro conclui a devolução. Cada time registra decisão, comentário livre e liberação da próxima etapa dentro do app.
+- **Checklist operacional com SLA por setor**: cada etapa registra responsável, status, comentário livre, bloqueios e prazo próprio sob condução do ADM, mantendo a ordem Validação NFD → retorno ADM → Transportes → Recebimento → Financeiro. Quando uma etapa é liberada, o app cria uma notificação persistente para o setor, registra o prazo calculado e envia o aviso por e-mail.
+- **SLA padrão por setor**: ADM aprova em até 4 horas úteis; Validação NFD valida NF em até 8 horas úteis; Transportes agenda coleta/entrega em até 1 dia útil; Recebimento confere em até 1 dia útil; Financeiro conclui em até 1 dia útil. O ADM pode configurar um SLA diferente para cada etapa.
+- **Escalonamento automático**: quando o prazo de uma etapa ativa vence, o app registra o escalonamento no Dataverse, reabre o aviso no Painel ADM e envia e-mail para a lista configurada pelo ADM para aquela etapa. O painel oferece configuração de destinatários por etapa e histórico geral pesquisável com solicitação, etapa, destinatários, data e status do envio; a marca persistente evita alertas duplicados para a mesma liberação.
+- **Encerramento**: quando o Financeiro conclui a etapa final, o histórico permanece vinculado à solicitação no aplicativo.
+
+## Páginas
+
+- **Solicitações/Formulário**: página inicial aberta para todos, com cadastro da devolução, geração de protocolo, campo de busca por protocolo e um segundo acesso **Já solicitei** que abre a página pública para informar o protocolo e anexar a NF de devolução depois da aprovação, sem exigir acesso ou senha.
+- **Instalação nas máquinas**: a página inicial oferece instalação como app/atalho corporativo quando o navegador permitir, mantendo acesso direto ao formulário sem login para solicitantes.
+- **Instruções para TI**: para instalar nas máquinas da empresa, a TI deve abrir o formulário no navegador corporativo, clicar em **Instalar app**, confirmar a instalação do atalho NTK e fixar o app na área de trabalho ou barra de tarefas. Se o botão não aparecer, usar o menu do navegador em **Instalar app** ou **Adicionar à área de trabalho**.
+- **NF de devolução**: página pública aberta pelo botão **Já solicitei** ou pelo link exibido após busca de protocolo aprovado, onde o solicitante informa o protocolo aprovado e anexa PDF, XML ou imagem da NF de devolução. O envio fica bloqueado até a aprovação interna, exibe progresso por etapa enquanto valida, lê e registra o arquivo, e o anexo entra no fluxo para conferência do ADM/Fiscal.
+- **Refaturamento**: formulário próprio acessado pela tela inicial, com nome do solicitante, gerente regional, código do cliente, número da nota fiscal e número do pedido; cada etapa exige status e comentário para avançar por Logística, Fiscal, ADM, Comercial e Financeiro. Cada setor recebe prazo de até 24 horas corridas a partir da atribuição, com vencimento e situação do SLA visíveis no painel interno.
+- **Histórico e notificações de refaturamento**: ADM e setores autorizados visualizam a linha do tempo completa de cada protocolo, incluindo etapa, status, responsável, comentário, atribuição, conclusão e cumprimento ou atraso do prazo. A demanda liberada aparece no painel do próximo responsável e gera aviso por e-mail; o Financeiro registra a baixa e encerra definitivamente o processo.
+- **Aprovações**: fila dedicada para Diretora, Gerente e ADM com decisão de aprovar/reprovar, painel de prazos por aprovador e escalonamento de SLA restrito ao ADM. O fluxo contempla aprovação inicial, retorno ao ADM após validação da NFD e nova liberação para os setores seguintes.
+- **Relatório de aprovações**: página interna para aprovadores e ADM consolidarem total de solicitações analisadas, aprovações, rejeições, pendências, valor aprovado em Real, decisões por protocolo e histórico de aprovação copiável para auditoria ou comunicação operacional, com botão para salvar o snapshot do painel relatório no Dataverse e exportar os dados em CSV.
+- **Anexos**: área administrativa para evidências, e-mails de aprovação da Diretora e do Gerente, upload real de nota fiscal com validação de formato, tamanho máximo, CNPJ, valor total e soma dos itens antes do registro, armazenamento do arquivo anexado, leitura inteligente dos dados da NF, registro do número da nota, cliente, CNPJ, valor total, inconsistências e produtos lidos com código, descrição, quantidade, valor unitário e valor total para conferência Fiscal.
+- **Administrativo / Dashboards por setor**: o ADM Geral `devolucao@gruponautika.com.br` tem acesso completo às informações do processo, páginas administrativas, relatórios, snapshots, anexos, exportações, SLA e gestão operacional. O Painel ADM organiza o trabalho em cinco abas focadas — **Visão geral**, **Solicitações**, **SLA**, **Arquivos** e **Configurações** — e abre em Solicitações para priorizar etapas atrasadas e a fila operacional ativa. Usuários de setor acessam somente o **Painel do setor**, filtrado para as solicitações liberadas para o próprio time, com dashboard exclusivo de pendências, aprovações, reprovações, atrasos, ranking de maiores atrasos, ranking de produtos por quantidade/valor, maior tempo em fila, Kanban por setor com prazos automáticos por etapa e logs de e-mail por protocolo, além de responsáveis, comentário livre, decisão aprovado/reprovado, histórico por etapa com usuário/data/comentário/próxima etapa e botão de liberar próxima etapa; eles não visualizam relatórios gerenciais, snapshots Dataverse, dados detalhados ADM, exportações administrativas, anexos gerais ou atalhos de gestão completa.
+
+## Dataverse
+
+O estado operacional é persistido em tabelas Dataverse dedicadas e relacionais: **Configuração de Etapa Operacional** mantém ordem, equipe, ação, chave de acesso e SLA; **Estado de Fluxo Operacional** mantém etapa atual, retorno ao ADM e finalização por solicitação; **Decisão de Etapa Operacional** registra decisão, comentário, responsável, data e próxima equipe; **Configuração Operacional** mantém destinatários e parâmetros; e **Log Operacional** registra e-mails, escalonamentos e migrações. A tabela **Liberação por Setor** mantém cada aviso no app, setor e responsável, atribuição, prazo SLA, status e resultado do envio por e-mail. Dados operacionais válidos anteriormente mantidos no navegador são migrados automaticamente uma única vez, confirmados nas tabelas relacionais e então removidos do armazenamento local; o navegador conserva somente preferências efêmeras de interface e a fila técnica de contingência para gravações ainda não sincronizadas. A conexão Dataverse está configurada no ambiente do aplicativo.
+
+## Solicitações realizadas e salvas
+Tudo que foi solicitado nesta sessão foi registrado como parte do estado atual do app: correção da página inicial para gerar protocolo sem quebrar com dados incompletos e cancelamento do envio via Teams, mantendo o tratamento de solicitações, aprovações, SLA, anexos e setores integralmente dentro do aplicativo.
+
+## Direção visual
+
+Interface objetiva, densa e executiva, com paleta institucional em laranja amarelado, preto e branco. A face do formulário exibe a identificação visual NTK no topo e o app instalado usa ícone NTK personalizado, priorizando leitura rápida, cadastro simples e geração de protocolo.
