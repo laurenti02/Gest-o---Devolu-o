@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import db from "../lib/db";
 
 const CAMPOS_INICIAIS = {
@@ -226,16 +226,24 @@ export default function Home() {
 function TopoPublico() {
   return (
     <header className="border-b border-line bg-white">
-      <div className="mx-auto flex max-w-2xl items-center gap-3 px-6 py-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-ink font-display text-sm font-bold text-ntk">
-          NTK
+      <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-6 py-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-ink font-display text-sm font-bold text-ntk">
+            NTK
+          </div>
+          <div>
+            <p className="font-display text-lg font-semibold leading-tight">
+              Gestão de Devoluções
+            </p>
+            <p className="text-xs text-muted">Grupo Nautika</p>
+          </div>
         </div>
-        <div>
-          <p className="font-display text-lg font-semibold leading-tight">
-            Gestão de Devoluções
-          </p>
-          <p className="text-xs text-muted">Grupo Nautika</p>
-        </div>
+        <Link
+          to="/entrar"
+          className="shrink-0 text-xs text-muted underline decoration-dotted underline-offset-2 hover:text-ink"
+        >
+          Acesso interno
+        </Link>
       </div>
     </header>
   );
