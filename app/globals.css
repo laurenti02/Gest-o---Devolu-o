@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+:root {
+  --ntk-preto: #17130f;
+  --ntk-preto-suave: #2b241c;
+  --ntk-branco: #fffdf9;
+  --ntk-osso: #f4efe4;
+  --ntk-laranja: #e08a1e;
+  --ntk-laranja-forte: #c96f0f;
+  --ntk-amarelo: #f2b632;
+  --ntk-borda: #e6dcc8;
+  --ntk-verde: #3f7d4d;
+  --ntk-vermelho: #b3402c;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+body {
+  background: var(--ntk-branco);
+  color: var(--ntk-preto);
+  font-family: var(--font-body);
+}
+
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+
+.ntk-card {
+  background: #fff;
+  border: 1px solid var(--ntk-borda);
+  border-radius: 4px;
+}
+
+.ntk-btn-primary {
+  background: var(--ntk-preto);
+  color: var(--ntk-osso);
+  border-radius: 3px;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+.ntk-btn-primary:hover { background: var(--ntk-laranja-forte); }
+.ntk-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ntk-btn-outline {
+  background: transparent;
+  border: 1px solid var(--ntk-preto);
+  color: var(--ntk-preto);
+  border-radius: 3px;
+  font-weight: 600;
+}
+.ntk-btn-outline:hover { background: var(--ntk-preto); color: var(--ntk-osso); }
+
+.ntk-input {
+  border: 1px solid var(--ntk-borda);
+  border-radius: 3px;
+  background: var(--ntk-branco);
+  padding: 0.6rem 0.75rem;
+  width: 100%;
+}
+.ntk-input:focus { outline: 2px solid var(--ntk-laranja); outline-offset: 1px; }
+
+.ntk-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}

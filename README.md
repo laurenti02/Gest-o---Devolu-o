@@ -1,107 +1,183 @@
-# Gestão de Devoluções — Grupo Nautika (NTK)
+# NTK Devoluções — Grupo Nautika
 
-Aplicativo web completo para o fluxo de devoluções: formulário público de
-solicitação, aprovações internas (Diretoria → Gerência → ADM), fluxo
-operacional por setor com SLA, anexos e leitura de NF, refaturamento e
-painel administrativo.
+App web de Controle de Solicitações de Devolução: formulário público com protocolo,
+aprovação dupla obrigatória (Diretoria + Gerente), fluxo por setor com SLA, leitura
+inteligente da NF de devolução (XML NFe / PDF) e relatórios exportáveis (CSV/Excel).
 
-Este projeto é um **protótipo funcional e completo**, pronto para rodar
-localmente. Ele usa uma camada de dados em memória/localStorage que espelha
-as tabelas descritas em `guia-publicacao-dataverse.md`, para que a migração
-para o Dataverse real seja direta (ver seção final).
+Construído fora do Power Apps/Dataverse para ter deploy e evolução rápidos: Next.js +
+Drizzle ORM + SQLite (troca simples para Postgres quando for para produção — ver abaixo).
 
-## Como rodar
+## Refaturamento (novo módulo, mesmo app e mesmo banco)
+
+Fluxo separado, mas vivendo dentro deste mesmo projeto/banco/deploy — sem precisar de
+um serviço novo no Railway:
+
+**Fluxo:** ADM aprova → Logística regulariza a mercadoria → Fiscal emite os documentos
+→ Financeiro concilia e conclui.
+
+**Contas:** para simplificar, o Refaturamento reaproveita perfis que já existem na
+Devolução, sempre que é o mesmo time cuidando da mesma função:
+- **ADM** → mesmo perfil `admin` de sempre (devolucao@, leidiane.morais@, victoria.sturaro@)
+- **Fiscal** → mesmo perfil `entrada_nfd` de sempre (fiscal@, kaio.morais@, silvia.baroni@)
+- **Financeiro** → mesmo perfil `financeiro` de sempre (kaline@, financeirocreditoecobranca@)
+- **Logística** → única conta nova: `logistica@gruponautika.com.br` (perfil `logistica`)
+
+Todas usam a mesma senha padrão do sistema (`nautika@2026`).
+
+**Páginas:**
+- `/refaturamento` — formulário público (gera protocolo `REF-AAAA-NNNNNN`)
+- `/refaturamento/protocolo/[protocolo]` — status público
+- `/refaturamento/aprovacoes` — fila do ADM
+- `/refaturamento/painel` — fila de trabalho por etapa (Logística/Fiscal/Financeiro), ou tudo, se ADM
+
+**Tabelas:** `refat_solicitacoes` e `refat_historico`, no mesmo arquivo SQLite/banco
+libSQL da Devolução — nomes prefixados para nunca colidir com as tabelas existentes.
+
+**Teste automatizado:** `node test/test-e2e-refaturamento.mjs` (com o servidor já
+rodando em `npm start`) — cobre criação pública, as 4 contas, permissões cruzadas e
+persistência de cada etapa.
+
+## Como rodar na nuvem (Railway — recomendado)
+
+O app guarda dados em arquivo (SQLite) e os PDFs/XMLs das NFs em disco, então a
+hospedagem precisa oferecer **disco persistente** — não é o caso do Vercel no plano
+padrão. Railway resolve isso fácil e sem precisar migrar para Postgres agora.
+
+1. Crie uma conta em https://railway.app (dá para entrar com GitHub ou e-mail).
+2. Instale a CLI do Railway no seu computador:
+   ```bash
+   npm install -g @railway/cli
+   ```
+3. Dentro da pasta do projeto, rode:
+   ```bash
+   railway login
+   railway init
+   railway up
+   ```
+   Isso já envia o projeto e faz o primeiro deploy.
+4. No painel do Railway, abra o serviço criado → aba **Variables** → adicione:
+   ```
+   AUTH_SECRET=uma-chave-longa-e-aleatoria
+   ```
+5. Ainda no painel, aba **Settings → Volumes**, crie um volume e monte em `/app/data`
+   (guarda o banco) — se quiser manter os anexos de NF entre deploys, crie outro volume
+   montado em `/app/public/uploads`. Sem isso os dados apagam a cada novo deploy.
+6. Em **Settings → Networking**, gere um domínio público (Railway dá um grátis do tipo
+   `seu-app.up.railway.app`, e dá para apontar um domínio próprio depois).
+7. Acesse esse endereço — é ele que o time vai usar, inclusive para instalar o atalho
+   do formulário nas máquinas.
+
+Cada vez que eu (ou você) alterar o código, basta rodar `railway up` de novo dentro da
+pasta do projeto para atualizar.
+
+## Rodar no servidor da empresa (Windows)
+
+Se preferir manter localmente em vez da nuvem, os arquivos `instalar-windows.bat` e
+`iniciar-servidor.bat` na raiz do projeto fazem a instalação e a inicialização.
+
+## Rodar localmente (desenvolvimento, qualquer sistema)
+
+Pré-requisitos: Node.js 20+.
 
 ```bash
 npm install
-npm run dev
+npm run db:seed      # cria o banco e os 16 usuários iniciais
+npm run dev           # http://localhost:3000
 ```
 
-Acesse `http://localhost:5173`. A página inicial é o formulário público
-(sem login). Para acessar as páginas internas, abra `/entrar` e escolha um
-dos perfis de demonstração (Diretoria, Gerência, ADM ou um usuário de
-setor) — isso simula a identidade que, em produção, viria do login
-Microsoft 365.
-
-Para gerar a versão de produção:
+Para rodar em modo produção:
 
 ```bash
 npm run build
+npm start
 ```
 
-Os arquivos finais ficam em `dist/`.
+## Login e senha inicial
+
+Todos os usuários (Gabriela, Tiago, ADM, setores, etc.) foram criados com a senha:
+
+```
+nautika@2026
+```
+
+**Troque essa senha em produção.** Hoje a troca é feita direto no banco (gerando um
+novo hash com bcrypt); posso adicionar uma tela de "trocar senha" se quiser.
+
+Acesso interno: `/login`
+Formulário público: `/` (não exige login)
+
+## Perfis cadastrados
+
+| Perfil | E-mails |
+|---|---|
+| admin | devolucao@gruponautika.com.br, leidiane.morais@..., victoria.sturaro@... |
+| diretoria | gabriela@gruponautika.com.br |
+| gerente | tiago@gruponautika.com.br |
+| validacao_nfd | devolucaofiscal@..., kaio.morais@..., silvia.baroni@omniteca.io |
+| coleta | matheus.calixto@..., gabriel.vieira@..., joice.sousa@... |
+| recebimento | larissa.correia@..., recebimento.ntk@... |
+| entrada_nfd | fiscal@..., kaio.morais@..., silvia.baroni@omniteca.io |
+| financeiro | kaline@..., financeirocreditoecobranca@... |
+
+## Páginas
+
+- `/` — formulário público de solicitação (gera protocolo)
+- `/ja-solicitei` — busca de protocolo
+- `/protocolo/[protocolo]` — status público + upload da NF de devolução
+- `/login` — acesso interno
+- `/aprovacoes` — fila de aprovação (Diretoria, Gerente, ADM)
+- `/admin` — painel geral (ADM)
+- `/setor` — painel Kanban do setor logado (ou todos, se ADM)
+- `/relatorio` — indicadores + **download de relatório em CSV e Excel** + snapshot
 
 ## Fluxo implementado
 
-1. **Formulário público (`/`)** — cadastro da devolução, geração de
-   protocolo, busca por protocolo, botão "Já solicitei".
-2. **Aprovações (`/aprovacoes`)** — fila para Diretoria (Gabriela), Gerência
-   (Tiago) e ADM. Aprovar avança a solicitação; reprovar exige comentário e
-   encerra o fluxo.
-3. **Envio da NF de devolução (`/ja-solicitei`)** — liberado somente após as
-   aprovações internas; simula validação, leitura inteligente e registro do
-   anexo.
-4. **Fluxo operacional automático** — após aprovado, a solicitação passa
-   por: ADM aprova → Validação NFD → Retorno ADM → Transportes →
-   Recebimento → Financeiro, cada etapa com SLA em horas úteis e prazo
-   calculado automaticamente.
-5. **Painel do setor (`/painel-setor`)** — fila de pendências do setor
-   logado, com comentário livre e botão "Liberar próxima etapa".
-6. **Painel ADM (`/painel-adm`)** — cinco abas: Solicitações, Visão geral,
-   SLA, Arquivos e Configurações (incluindo SLA configurável por etapa).
-7. **Relatório de aprovações (`/relatorio-aprovacoes`)** — totais,
-   histórico de decisões e exportação CSV.
-8. **Anexos (`/anexos`)** — evidências e leitura da NF por protocolo.
-9. **Refaturamento (`/refaturamento`)** — fluxo próprio por Logística,
-   Fiscal, ADM, Comercial e Financeiro, com SLA de 24h corridas por etapa.
+1. Solicitante preenche o formulário → protocolo gerado.
+2. Fica bloqueado até aprovação da **Diretoria e do Gerente** (ambas obrigatórias).
+   Se qualquer um reprovar, a solicitação é encerrada como reprovada.
+3. Aprovado → solicitante anexa a NF de devolução na página do protocolo. O sistema
+   lê o XML NFe automaticamente (número, CNPJ, valor, itens) e sinaliza inconsistências
+   (ex.: CNPJ divergente, soma dos itens ≠ valor total). PDF usa leitura heurística por
+   texto; imagens ficam marcadas para conferência manual.
+4. A partir daí o fluxo passa pelos setores, cada um com SLA e prazo calculado em horas
+   úteis (seg-sex, 08h-18h): Validação NFD (8h) → Retorno ADM (4h) → Transportes (24h)
+   → Recebimento (24h) → Financeiro (24h). Cada setor conclui sua etapa no Kanban de
+   `/setor`, o que libera automaticamente a próxima.
+5. Tudo fica registrado no histórico (auditoria) por protocolo.
 
-## Estrutura
+## Relatórios
+
+Na página `/relatorio` (Diretoria, Gerente ou ADM):
+- Indicadores: total, aprovadas, reprovadas, pendentes, valor total aprovado.
+- Tabela com todas as solicitações e decisões.
+- **Baixar CSV** e **Baixar Excel** — download direto do relatório completo.
+- **Salvar snapshot** — grava um resumo no histórico com o marcador
+  `RELATORIO-APROVACOES`, para referência futura.
+
+## Banco de dados
+
+Usa SQLite local (arquivo `data/devolucoes.db`) via libSQL + Drizzle ORM — leve, sem
+servidor externo, e sem dependência de compilação nativa (importante para hospedagens
+como Railway, onde o ambiente de build pode diferir do de execução). O schema está em
+`lib/db/schema.ts` e o SQL de criação em `lib/db/init.sql`.
+
+Para migrar para um banco remoto (Turso, por exemplo, que usa o mesmo protocolo
+libSQL) basta trocar a URL em `lib/db/index.ts` de `file:...` para a URL do banco
+remoto — o resto do código não muda.
+
+## Variáveis de ambiente
+
+Crie um `.env.local` para produção:
 
 ```
-src/
-  lib/
-    db.js        // camada de dados (tabelas + regras de negócio)
-    auth.jsx      // identidade simulada (placeholder MSAL)
-    format.js     // formatação de moeda, data e status
-  components/
-    InternalShell.jsx   // layout interno (sidebar)
-    RequireRole.jsx     // proteção de rota por perfil
-    StatusBadge.jsx
-  pages/
-    Home.jsx, StatusPublico.jsx, JaSolicitei.jsx   // páginas públicas
-    Entrar.jsx                                      // login simulado
-    Aprovacoes.jsx, RelatorioAprovacoes.jsx
-    PainelSetor.jsx, Anexos.jsx, Refaturamento.jsx
-    painel_adm/PainelADM.jsx                        // 5 abas
+AUTH_SECRET=uma-chave-secreta-longa-e-aleatoria
 ```
 
-## Próximos passos para produção
+## Próximos passos sugeridos
 
-### 1. Autenticação Microsoft 365 (MSAL)
-
-Troque `src/lib/auth.jsx` por `@azure/msal-react`. O perfil do usuário
-(Administrador, Diretoria, Gerência, setor) deve vir da tabela Dataverse
-**Usuário**, cruzada pelo e-mail autenticado — não por seleção manual.
-
-### 2. Dataverse real
-
-Siga `guia-publicacao-dataverse.md` para publicar as tabelas. Depois, troque
-as funções `readTable`/`writeTable` em `src/lib/db.js` por chamadas ao
-Dataverse Web API (`/api/data/v9.2/<tabela>`), mantendo os mesmos nomes de
-tabela e formato de registro já usados — o restante do app não precisa
-mudar. As tabelas usadas neste protótipo (`db.TABLES`) já seguem a
-nomenclatura do guia: `solicitacao_devolucao`, `complemento_devolucao`,
-`historico_aprovacao`, `liberacao_setor`, `evento_sla`, `anexo`,
-`leitura_nf`, `item_nf`, `log_operacional`, `config_operacional`.
-
-### 3. Envio de e-mail real
-
-As notificações de liberação de etapa e escalonamento hoje são apenas
-registradas em log (`db.registrarLog`). Em produção, conecte esse ponto a
-um serviço de e-mail (Power Automate, Graph API, etc.).
-
-### 4. Leitura de NF
-
-A leitura inteligente da NF em `JaSolicitei.jsx` está simulada. Substitua
-por um serviço real de OCR/leitura fiscal que valide CNPJ, valor total e
-soma dos itens antes do registro.
+- Hospedagem (Vercel, servidor próprio, etc.) — posso ajudar a configurar.
+- Migrar para Postgres se for ter uso simultâneo real.
+- Tela de troca de senha / gestão de usuários pelo ADM.
+- Notificações por e-mail nas mudanças de etapa (hoje fica só no histórico do app).
+- Leitura inteligente de PDF/imagem via IA (hoje é heurística por regex para PDF, e
+  manual para imagem) — se quiser mais precisão, dá para plugar um modelo de visão.

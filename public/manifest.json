@@ -1,0 +1,12 @@
+{
+  "name": "NTK Devoluções — Grupo Nautika",
+  "short_name": "NTK Devoluções",
+  "description": "Controle de Solicitações de Devolução do Grupo Nautika",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffdf9",
+  "theme_color": "#17130f",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }
+  ]
+}
