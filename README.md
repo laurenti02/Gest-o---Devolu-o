@@ -7,6 +7,28 @@ inteligente da NF de devolução (XML NFe / PDF) e relatórios exportáveis (CSV
 Construído fora do Power Apps/Dataverse para ter deploy e evolução rápidos: Next.js +
 Drizzle ORM + SQLite (troca simples para Postgres quando for para produção — ver abaixo).
 
+## Planner Administrativo Comercial (também no mesmo app, login separado)
+
+Terceiro módulo dentro do mesmo projeto/banco/deploy. Diferente do Refaturamento, o
+Planner **não reaproveita** os perfis da Devolução — cada pessoa cria sua própria
+conta (nome, e-mail, senha), sem perfil fixo, exatamente como no app original.
+
+- **Acesso:** `/planner` — tela de login/cadastro própria.
+- **Sessão separada de verdade:** cookie `planner_session`, diferente do `ntk_session`
+  usado pela Devolução/Refaturamento. Um não autentica no outro.
+- **Dados:** cada usuário tem seu próprio registro JSON (Painel, Metas, Agenda,
+  Planejamento semanal, Funil de vendas, Carteira de clientes, Tarefas administrativas)
+  nas tabelas `planner_usuarios` e `planner_dados`, no mesmo banco SQLite/libSQL.
+- **Controle de Cartão Corporativo removido** a pedido — não existe mais essa aba,
+  nem nos dados de contas novas, nem nos cálculos do Painel.
+- **Front-end:** é o mesmo HTML/CSS/JS do Planner original (não foi reescrito em
+  React) — servido em `/planner` via `app/planner/route.ts`, que lê
+  `public/planner-app.html` e devolve como página comum. Só as chamadas de API
+  internas foram redirecionadas para os novos endpoints (`/api/planner/...`).
+- **Teste automatizado:** `node test/test-e2e-planner.mjs` (com `npm start` já
+  rodando) — cobre cadastro, isolamento de sessão, salvar/carregar dados, troca de
+  senha e logout.
+
 ## Refaturamento (novo módulo, mesmo app e mesmo banco)
 
 Fluxo separado, mas vivendo dentro deste mesmo projeto/banco/deploy — sem precisar de

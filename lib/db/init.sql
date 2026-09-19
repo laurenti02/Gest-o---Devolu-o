@@ -118,8 +118,24 @@ CREATE TABLE IF NOT EXISTS refat_historico (
   criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS planner_usuarios (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nome TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  senha_hash TEXT NOT NULL,
+  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS planner_dados (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  usuario_id INTEGER NOT NULL UNIQUE REFERENCES planner_usuarios(id) ON DELETE CASCADE,
+  dados TEXT NOT NULL,
+  atualizado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_solicitacoes_protocolo ON solicitacoes(protocolo);
 CREATE INDEX IF NOT EXISTS idx_etapas_solicitacao ON etapas(solicitacao_id);
 CREATE INDEX IF NOT EXISTS idx_aprovacoes_solicitacao ON aprovacoes(solicitacao_id);
 CREATE INDEX IF NOT EXISTS idx_refat_protocolo ON refat_solicitacoes(protocolo);
 CREATE INDEX IF NOT EXISTS idx_refat_historico ON refat_historico(refaturamento_id);
+CREATE INDEX IF NOT EXISTS idx_planner_usuarios_email ON planner_usuarios(email);

@@ -96,6 +96,13 @@ export default function PaginaInicial() {
               Já solicitei
             </Link>
             <Link
+              href="/planner"
+              className="text-sm font-medium underline underline-offset-4"
+              style={{ color: "var(--ntk-preto)" }}
+            >
+              Planner
+            </Link>
+            <Link
               href="/login"
               className="text-sm font-medium underline underline-offset-4"
               style={{ color: "var(--ntk-preto)" }}

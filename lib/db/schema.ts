@@ -144,3 +144,23 @@ export const refaturamentoHistorico = sqliteTable("refat_historico", {
   comentario: text("comentario"),
   criadoEm: text("criado_em").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+// ============================================================
+// PLANNER — mesmo banco, login totalmente separado (conta própria,
+// sem perfil fixo). Tabelas com prefixo planner_ para nunca colidir
+// com as tabelas de usuarios/solicitacoes da Devolução/Refaturamento.
+// ============================================================
+export const plannerUsuarios = sqliteTable("planner_usuarios", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  nome: text("nome").notNull(),
+  email: text("email").notNull().unique(),
+  senhaHash: text("senha_hash").notNull(),
+  criadoEm: text("criado_em").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const plannerDados = sqliteTable("planner_dados", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  usuarioId: integer("usuario_id").notNull().unique().references(() => plannerUsuarios.id, { onDelete: "cascade" }),
+  dados: text("dados", { mode: "json" }).notNull(),
+  atualizadoEm: text("atualizado_em").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
