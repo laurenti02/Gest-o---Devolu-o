@@ -3,10 +3,19 @@ import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 
-const dataDir = path.join(process.cwd(), "data");
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-const dbPath = path.join(dataDir, "devolucoes.db");
-const client = createClient({ url: `file:${dbPath}` });
+// Usa o Turso quando as variáveis de ambiente estiverem definidas
+// (mesma lógica de lib/db/index.ts). Sem elas, cai no arquivo local
+// só para desenvolvimento.
+const tursoUrl = process.env.TURSO_DATABASE_URL;
+let dbPath = "";
+const client = tursoUrl
+  ? createClient({ url: tursoUrl, authToken: process.env.TURSO_AUTH_TOKEN })
+  : (() => {
+      const dataDir = path.join(process.cwd(), "data");
+      if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+      dbPath = path.join(dataDir, "devolucoes.db");
+      return createClient({ url: `file:${dbPath}` });
+    })();
 
 const SENHA_PADRAO = "nautika@2026";
 
@@ -53,7 +62,11 @@ async function main() {
     });
   }
 
-  console.log(`Banco inicializado em ${dbPath}`);
+  if (tursoUrl) {
+    console.log(`Banco inicializado no Turso: ${tursoUrl}`);
+  } else {
+    console.log(`Banco inicializado em ${dbPath} (arquivo local — TURSO_DATABASE_URL não foi definida)`);
+  }
   console.log(`${usuarios.length} usuários criados/verificados.`);
   console.log(`Senha padrão para todos (trocar depois): ${SENHA_PADRAO}`);
 }

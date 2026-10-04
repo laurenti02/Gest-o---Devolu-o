@@ -1,8 +1,0 @@
-node_modules/
-.next/
-data/*.db
-data/*.db-shm
-data/*.db-wal
-public/uploads/*
-!public/uploads/.gitkeep
-.env.local
