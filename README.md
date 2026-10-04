@@ -59,38 +59,57 @@ libSQL da Devolução — nomes prefixados para nunca colidir com as tabelas exi
 rodando em `npm start`) — cobre criação pública, as 4 contas, permissões cruzadas e
 persistência de cada etapa.
 
-## Como rodar na nuvem (Railway — recomendado)
+## Como rodar na nuvem (Vercel + Turso — gratuito, sem cartão de crédito)
 
-O app guarda dados em arquivo (SQLite) e os PDFs/XMLs das NFs em disco, então a
-hospedagem precisa oferecer **disco persistente** — não é o caso do Vercel no plano
-padrão. Railway resolve isso fácil e sem precisar migrar para Postgres agora.
+O app guarda dados em SQLite (via libSQL) e os anexos de NF em arquivo. A Vercel não
+tem disco persistente (ambiente serverless), então em produção o app usa dois serviços
+externos gratuitos no lugar do disco: **Turso** (banco remoto, mesmo protocolo libSQL
+que o app já usa) e **Vercel Blob** (armazenamento de arquivos). Sem as variáveis de
+ambiente abaixo configuradas, o app cai automaticamente para arquivo local — então
+continua funcionando normalmente em desenvolvimento, só não persiste em produção sem
+elas.
 
-1. Crie uma conta em https://railway.app (dá para entrar com GitHub ou e-mail).
-2. Instale a CLI do Railway no seu computador:
+### 1. Criar o banco no Turso
+1. Crie uma conta em https://turso.tech (dá para entrar com GitHub).
+2. Instale a CLI do Turso e crie o banco:
    ```bash
-   npm install -g @railway/cli
+   curl -sSfL https://get.tur.so/install.sh | bash
+   turso auth login
+   turso db create nautika-app
+   turso db show nautika-app --url
+   turso db tokens create nautika-app
    ```
-3. Dentro da pasta do projeto, rode:
+   Guarde a URL (começa com `libsql://...`) e o token gerados.
+3. Rode a criação das tabelas e o cadastro das contas iniciais **a partir do seu
+   computador**, apontando para o banco remoto:
    ```bash
-   railway login
-   railway init
-   railway up
+   TURSO_DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." npm run db:seed
    ```
-   Isso já envia o projeto e faz o primeiro deploy.
-4. No painel do Railway, abra o serviço criado → aba **Variables** → adicione:
+   (No Windows/PowerShell: `$env:TURSO_DATABASE_URL="libsql://..."; $env:TURSO_AUTH_TOKEN="..."; npm run db:seed`)
+
+### 2. Criar o armazenamento de arquivos (Vercel Blob)
+Isso é feito depois do projeto já existir na Vercel (passo 3), direto pelo painel —
+veja a instrução no passo 4.
+
+### 3. Publicar na Vercel
+1. Crie uma conta em https://vercel.com (dá para entrar com GitHub).
+2. **Add New → Project**, selecione o repositório deste app no GitHub.
+3. A Vercel detecta Next.js automaticamente — não precisa mudar nada no build.
+4. Antes de clicar em "Deploy", abra **Environment Variables** e adicione:
    ```
    AUTH_SECRET=uma-chave-longa-e-aleatoria
+   TURSO_DATABASE_URL=libsql://... (a URL do passo 1)
+   TURSO_AUTH_TOKEN=... (o token do passo 1)
    ```
-5. Ainda no painel, aba **Settings → Volumes**, crie um volume e monte em `/app/data`
-   (guarda o banco) — se quiser manter os anexos de NF entre deploys, crie outro volume
-   montado em `/app/public/uploads`. Sem isso os dados apagam a cada novo deploy.
-6. Em **Settings → Networking**, gere um domínio público (Railway dá um grátis do tipo
-   `seu-app.up.railway.app`, e dá para apontar um domínio próprio depois).
-7. Acesse esse endereço — é ele que o time vai usar, inclusive para instalar o atalho
-   do formulário nas máquinas.
+5. Clique em **Deploy** e espere terminar.
+6. No projeto já criado, vá em **Storage → Create Database → Blob**. A Vercel já
+   injeta a variável `BLOB_READ_WRITE_TOKEN` sozinha — não precisa copiar nada
+   manualmente. Isso dispara um novo deploy automático.
+7. Acesse o domínio que a Vercel gerou (tipo `seu-app.vercel.app`) — é ele que o time
+   vai usar.
 
-Cada vez que eu (ou você) alterar o código, basta rodar `railway up` de novo dentro da
-pasta do projeto para atualizar.
+Cada `git push` no repositório já publica uma nova versão sozinho — não precisa de
+nenhum comando manual depois do primeiro deploy.
 
 ## Rodar no servidor da empresa (Windows)
 
@@ -178,28 +197,32 @@ Na página `/relatorio` (Diretoria, Gerente ou ADM):
 
 ## Banco de dados
 
-Usa SQLite local (arquivo `data/devolucoes.db`) via libSQL + Drizzle ORM — leve, sem
-servidor externo, e sem dependência de compilação nativa (importante para hospedagens
-como Railway, onde o ambiente de build pode diferir do de execução). O schema está em
-`lib/db/schema.ts` e o SQL de criação em `lib/db/init.sql`.
+Usa SQLite via libSQL + Drizzle ORM — leve e sem dependência de compilação nativa. O
+schema está em `lib/db/schema.ts` e o SQL de criação em `lib/db/init.sql`.
 
-Para migrar para um banco remoto (Turso, por exemplo, que usa o mesmo protocolo
-libSQL) basta trocar a URL em `lib/db/index.ts` de `file:...` para a URL do banco
-remoto — o resto do código não muda.
+Dois modos, escolhidos automaticamente por `lib/db/index.ts` conforme as variáveis de
+ambiente:
+- **Sem `TURSO_DATABASE_URL` configurada** → usa um arquivo local (`data/devolucoes.db`).
+  Bom para desenvolvimento; não persiste em hospedagens sem disco persistente (Vercel).
+- **Com `TURSO_DATABASE_URL` configurada** → conecta no banco remoto Turso (mesmo
+  protocolo libSQL, nenhuma outra mudança de código). É o modo usado em produção na
+  Vercel — veja "Como rodar na nuvem" acima.
 
 ## Variáveis de ambiente
 
-Crie um `.env.local` para produção:
+Crie um `.env.local` (veja `.env.local.example` para a lista completa com comentários):
 
 ```
 AUTH_SECRET=uma-chave-secreta-longa-e-aleatoria
+TURSO_DATABASE_URL=            # vazio = usa arquivo local; preenchido = usa Turso
+TURSO_AUTH_TOKEN=
+BLOB_READ_WRITE_TOKEN=         # vazio = salva anexos em public/uploads; preenchido = usa Vercel Blob
 ```
 
 ## Próximos passos sugeridos
 
-- Hospedagem (Vercel, servidor próprio, etc.) — posso ajudar a configurar.
-- Migrar para Postgres se for ter uso simultâneo real.
-- Tela de troca de senha / gestão de usuários pelo ADM.
+- Tela de troca de senha / gestão de usuários pelo ADM (a Devolução ainda não tem;
+  o Planner já tem, em `/planner`).
 - Notificações por e-mail nas mudanças de etapa (hoje fica só no histórico do app).
 - Leitura inteligente de PDF/imagem via IA (hoje é heurística por regex para PDF, e
   manual para imagem) — se quiser mais precisão, dá para plugar um modelo de visão.

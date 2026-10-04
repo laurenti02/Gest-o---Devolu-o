@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { lerXmlNfe, lerTextoPdf, resultadoManual } from "@/lib/leituraNf";
+import { put } from "@vercel/blob";
 import fs from "fs";
 import path from "path";
 import { calcularPrazoLimite } from "@/lib/fluxo";
@@ -65,8 +66,18 @@ export async function POST(req: NextRequest) {
 
     const bytes = Buffer.from(await arquivo.arrayBuffer());
     const nomeArquivo = `${protocolo}-${Date.now()}.${extensao}`;
-    const destino = path.join(process.cwd(), "public", "uploads", nomeArquivo);
-    fs.writeFileSync(destino, bytes);
+
+    // Em produção (Vercel), o disco não persiste entre execuções — usa o Vercel Blob.
+    // Em dev local, sem BLOB_READ_WRITE_TOKEN configurado, grava em public/uploads como antes.
+    let caminhoAnexo: string;
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const blob = await put(`uploads/${nomeArquivo}`, bytes, { access: "public" });
+      caminhoAnexo = blob.url;
+    } else {
+      const destino = path.join(process.cwd(), "public", "uploads", nomeArquivo);
+      fs.writeFileSync(destino, bytes);
+      caminhoAnexo = `/uploads/${nomeArquivo}`;
+    }
 
     let leitura;
     if (formato === "xml") {
@@ -95,7 +106,7 @@ export async function POST(req: NextRequest) {
       .values({
         solicitacaoId: solicitacao.id,
         arquivoNome: arquivo.name,
-        arquivoPath: `/uploads/${nomeArquivo}`,
+        arquivoPath: caminhoAnexo,
         formato,
         numeroNota: leitura.numeroNota,
         clienteLido: leitura.cliente,

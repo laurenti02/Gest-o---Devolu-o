@@ -10,11 +10,16 @@ let _db: DrizzleDb | null = null;
 
 function getDb(): DrizzleDb {
   if (!_db) {
-    const dataDir = path.join(process.cwd(), "data");
-    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-    const client = createClient({
-      url: `file:${path.join(dataDir, "devolucoes.db")}`,
-    });
+    // Se TURSO_DATABASE_URL estiver configurada (produção na Vercel), usa o banco
+    // remoto Turso. Caso contrário, cai para um arquivo SQLite local (dev/local).
+    const turso = process.env.TURSO_DATABASE_URL;
+    const client = turso
+      ? createClient({ url: turso, authToken: process.env.TURSO_AUTH_TOKEN })
+      : (() => {
+          const dataDir = path.join(process.cwd(), "data");
+          if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+          return createClient({ url: `file:${path.join(dataDir, "devolucoes.db")}` });
+        })();
     _db = drizzle(client, { schema });
   }
   return _db;
