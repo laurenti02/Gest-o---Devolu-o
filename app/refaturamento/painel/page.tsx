@@ -3,8 +3,7 @@ import { getSessao, PERFIS_ADM } from "@/lib/auth";
 import { db, schema } from "@/lib/db";
 import { eq, and } from "drizzle-orm";
 import { PERFIL_ETAPA, ETAPA_LABEL } from "@/lib/refaturamento-fluxo";
-import { TopoInterno } from "@/components/TopoInterno";
-import { NavInterna } from "@/components/NavInterna";
+import { ShellInterno } from "@/components/ShellInterno";
 import { PainelRefaturamentoCliente } from "./PainelRefaturamentoCliente";
 
 export default async function PainelRefaturamento() {
@@ -25,13 +24,12 @@ export default async function PainelRefaturamento() {
 
   return (
     <>
-      <TopoInterno
+      <ShellInterno
         nome={sessao.nome}
         perfil={sessao.perfil}
         subtitulo={`Refaturamento · ${isAdmin ? "Todas as etapas" : ETAPA_LABEL[minhaEtapa]}`}
-      />
-      <NavInterna perfil={sessao.perfil} />
-      <main className="flex-1 max-w-6xl mx-auto px-4 py-6 w-full" style={{ background: "var(--ntk-osso)" }}>
+      >
+      <div className="ntk-view">
         <h1 className="font-display text-2xl font-bold mb-1">
           {isAdmin ? "Refaturamento — todas as etapas" : `Refaturamento — ${ETAPA_LABEL[minhaEtapa]}`}
         </h1>
@@ -39,7 +37,8 @@ export default async function PainelRefaturamento() {
           Solicitações aprovadas, agrupadas pela etapa atual do fluxo.
         </p>
         <PainelRefaturamentoCliente listaInicial={lista} perfil={sessao.perfil} isAdmin={isAdmin} />
-      </main>
+      </div>
+      </ShellInterno>
     </>
   );
 }

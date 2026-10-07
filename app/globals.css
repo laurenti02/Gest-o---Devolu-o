@@ -1,23 +1,26 @@
 @import "tailwindcss";
 
+/* Visual igual ao do Planner: azul escuro, laranja, preto e branco */
 :root {
-  --ntk-preto: #17130f;
-  --ntk-preto-suave: #2b241c;
-  --ntk-branco: #fffdf9;
-  --ntk-osso: #f4efe4;
-  --ntk-laranja: #e08a1e;
-  --ntk-laranja-forte: #c96f0f;
-  --ntk-amarelo: #f2b632;
-  --ntk-borda: #e6dcc8;
-  --ntk-verde: #3f7d4d;
-  --ntk-vermelho: #b3402c;
-  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --ntk-preto: #0a0f1a;
+  --ntk-preto-suave: #0b1f3a;
+  --ntk-branco: #ffffff;
+  --ntk-osso: #f3f6fa;
+  --ntk-laranja: #ff7a1a;
+  --ntk-laranja-forte: #e8600a;
+  --ntk-amarelo: #ff9a3d;
+  --ntk-borda: rgba(10, 15, 26, 0.14);
+  --ntk-verde: #2f5d4e;
+  --ntk-vermelho: #a23b2e;
+  --ntk-azul: #0b1f3a;
+  --ntk-sombra: 0 1px 2px rgba(20, 20, 20, 0.08), 0 4px 14px rgba(20, 20, 20, 0.08);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
 body {
-  background: var(--ntk-branco);
+  background: var(--ntk-osso);
   color: var(--ntk-preto);
   font-family: var(--font-body);
 }
@@ -25,40 +28,216 @@ body {
 .font-display { font-family: var(--font-display); }
 .font-mono { font-family: var(--font-mono); }
 
+/* ============ Estrutura das telas internas ============ */
+.ntk-app { display: flex; min-height: 100vh; }
+
+.ntk-side {
+  width: 236px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--ntk-preto) 0%, var(--ntk-preto-suave) 100%);
+  padding: 28px 0 20px 0;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.ntk-side-brand {
+  padding: 0 22px 22px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 14px;
+}
+.ntk-side-logo {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ntk-side-logo img { max-width: 100%; height: auto; display: block; }
+.ntk-side-mark {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffb27a;
+  margin-bottom: 4px;
+}
+.ntk-side-title {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.25;
+}
+.ntk-side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow-y: auto;
+}
+.ntk-side-link {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 8px 20px 8px 22px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  width: 100%;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+.ntk-side-link:hover { background: rgba(255, 255, 255, 0.07); }
+.ntk-side-link[aria-current="page"] {
+  background: #fff;
+  color: var(--ntk-preto);
+  transform: translateX(10px);
+  font-weight: 600;
+  box-shadow: -6px 0 14px rgba(0, 0, 0, 0.18);
+}
+.ntk-side-foot {
+  padding: 16px 22px 0 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 14px;
+}
+.ntk-side-user {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ntk-side-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ntk-laranja);
+  flex-shrink: 0;
+}
+.ntk-side-role {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 10px;
+}
+.ntk-side-sair {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  width: 100%;
+}
+.ntk-side-sair:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+
+.ntk-content { flex: 1; min-width: 0; background: var(--ntk-osso); min-height: 100vh; }
+.ntk-topbar {
+  padding: 22px 36px;
+  background: #fff;
+  border-bottom: 1px solid var(--ntk-borda);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.ntk-topbar-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--ntk-preto);
+}
+.ntk-topbar-date {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ntk-laranja-forte);
+  text-transform: capitalize;
+  margin-top: 2px;
+}
+.ntk-view { padding: 30px 36px 60px 36px; }
+
+@media (max-width: 880px) {
+  .ntk-app { flex-direction: column; }
+  .ntk-side { width: 100%; height: auto; position: relative; padding: 14px 10px; }
+  .ntk-side-brand, .ntk-side-foot { display: none; }
+  .ntk-side-nav { flex-direction: row; overflow-x: auto; }
+  .ntk-side-link { clip-path: none; border-radius: 8px; white-space: nowrap; min-height: 38px; width: auto; }
+  .ntk-side-link[aria-current="page"] { transform: none; }
+  .ntk-topbar { padding: 16px 18px; }
+  .ntk-view { padding: 20px 16px 40px 16px; }
+}
+
+/* ============ Tela de login (fundo escuro como o do Planner) ============ */
+.ntk-login {
+  min-height: 100vh;
+  background:
+    radial-gradient(700px 420px at 80% 0%, rgba(255, 122, 26, 0.3), transparent 60%),
+    linear-gradient(180deg, var(--ntk-preto) 0%, var(--ntk-preto-suave) 100%);
+}
+.ntk-login .ntk-card {
+  border-radius: 14px;
+  border: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+/* ============ Cartões ============ */
 .ntk-card {
   background: #fff;
   border: 1px solid var(--ntk-borda);
-  border-radius: 4px;
+  border-radius: 10px;
+  box-shadow: var(--ntk-sombra);
 }
 
+/* Indicadores */
+.ntk-kpi { padding: 16px 18px; }
+.ntk-kpi-valor {
+  font-family: var(--font-mono);
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+/* ============ Botões ============ */
 .ntk-btn-primary {
   background: var(--ntk-preto);
-  color: var(--ntk-osso);
-  border-radius: 3px;
+  color: #fff;
+  border-radius: 7px;
   font-weight: 600;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
-.ntk-btn-primary:hover { background: var(--ntk-laranja-forte); }
+.ntk-btn-primary:hover:not(:disabled) { background: var(--ntk-laranja-forte); }
+.ntk-btn-primary:active:not(:disabled) { transform: scale(0.97); }
 .ntk-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .ntk-btn-outline {
-  background: transparent;
-  border: 1px solid var(--ntk-preto);
+  background: #fff;
+  border: 1px solid var(--ntk-borda);
   color: var(--ntk-preto);
-  border-radius: 3px;
+  border-radius: 7px;
   font-weight: 600;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
-.ntk-btn-outline:hover { background: var(--ntk-preto); color: var(--ntk-osso); }
+.ntk-btn-outline:hover { background: #e8edf5; }
+.ntk-btn-outline:active { transform: scale(0.97); }
 
+/* ============ Campos ============ */
 .ntk-input {
   border: 1px solid var(--ntk-borda);
-  border-radius: 3px;
-  background: var(--ntk-branco);
+  border-radius: 7px;
+  background: #fff;
   padding: 0.6rem 0.75rem;
   width: 100%;
 }
-.ntk-input:focus { outline: 2px solid var(--ntk-laranja); outline-offset: 1px; }
+.ntk-input:focus { outline: 2px solid var(--ntk-laranja); outline-offset: -1px; }
 
+/* ============ Etiquetas e status ============ */
 .ntk-tag {
   display: inline-flex;
   align-items: center;
@@ -71,3 +250,34 @@ body {
   border-radius: 999px;
   border: 1px solid currentColor;
 }
+
+.ntk-pill {
+  display: inline-block;
+  padding: 0.18rem 0.65rem;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #e8edf5;
+  color: var(--ntk-preto-suave);
+}
+.ntk-pill-ok   { background: #e3ece7; color: var(--ntk-verde); }
+.ntk-pill-bad  { background: #f3e3e0; color: var(--ntk-vermelho); }
+.ntk-pill-warn { background: #fce3d2; color: var(--ntk-laranja-forte); }
+.ntk-pill-info { background: #e1e7f0; color: var(--ntk-preto-suave); }
+
+/* ============ Tabelas ============ */
+.ntk-table { border-collapse: collapse; }
+.ntk-table thead th {
+  background: var(--ntk-preto);
+  color: #fff !important;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--ntk-laranja) !important;
+}
+.ntk-table tbody tr:nth-child(even) { background: #eef2f8; }
+.ntk-table tbody tr:hover { background: #fde9da; }
+
+::selection { background: #ffb27a; color: var(--ntk-preto); }

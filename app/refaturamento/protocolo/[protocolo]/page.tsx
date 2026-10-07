@@ -34,7 +34,7 @@ export default function StatusProtocoloRefaturamento() {
   }, [params.protocolo]);
 
   return (
-    <main className="flex-1 flex items-center justify-center px-4 py-10" style={{ background: "var(--ntk-osso)" }}>
+    <main className="flex-1 flex items-center justify-center px-4 py-10">
       <div className="ntk-card p-8 max-w-lg w-full">
         <MarcaNTK subtitulo="Refaturamento" />
         {erro && (

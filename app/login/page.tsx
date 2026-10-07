@@ -48,7 +48,7 @@ function LoginForm() {
   }
 
   return (
-    <main className="flex-1 flex items-center justify-center px-4" style={{ background: "var(--ntk-osso)" }}>
+    <main className="ntk-login flex-1 flex items-center justify-center px-4">
       <div className="ntk-card p-8 max-w-sm w-full">
         <MarcaNTK subtitulo="Acesso interno" />
         <h1 className="font-display text-2xl font-bold mt-6 mb-1">Entrar</h1>

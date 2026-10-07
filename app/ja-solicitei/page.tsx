@@ -14,7 +14,7 @@ export default function JaSolicitei() {
   }
 
   return (
-    <main className="flex-1 flex items-center justify-center px-4" style={{ background: "var(--ntk-osso)" }}>
+    <main className="flex-1 flex items-center justify-center px-4">
       <div className="ntk-card p-8 max-w-md w-full">
         <MarcaNTK subtitulo="Controle de Devoluções" />
         <h1 className="font-display text-2xl font-bold mt-6 mb-1">Já solicitei</h1>

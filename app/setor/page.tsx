@@ -3,8 +3,7 @@ import { getSessao, PERFIS_SETOR, PERFIS_ADM } from "@/lib/auth";
 import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { SETOR_LABEL, estaAtrasado } from "@/lib/fluxo";
-import { TopoInterno } from "@/components/TopoInterno";
-import { NavInterna } from "@/components/NavInterna";
+import { ShellInterno } from "@/components/ShellInterno";
 import { PainelSetorCliente } from "./PainelSetorCliente";
 
 export default async function PainelSetor() {
@@ -29,9 +28,8 @@ export default async function PainelSetor() {
 
   return (
     <>
-      <TopoInterno nome={sessao.nome} perfil={sessao.perfil} subtitulo={setor ? SETOR_LABEL[setor] : "Todos os setores"} />
-      <NavInterna perfil={sessao.perfil} />
-      <main className="flex-1 max-w-6xl mx-auto px-4 py-6 w-full" style={{ background: "var(--ntk-osso)" }}>
+      <ShellInterno nome={sessao.nome} perfil={sessao.perfil} subtitulo={setor ? SETOR_LABEL[setor] : "Todos os setores"} >
+      <div className="ntk-view">
         <h1 className="font-display text-2xl font-bold mb-1">
           {setor ? `Painel — ${SETOR_LABEL[setor]}` : "Painel — todos os setores"}
         </h1>
@@ -39,7 +37,8 @@ export default async function PainelSetor() {
           Pendências, prazos e liberação da próxima etapa do fluxo de devolução.
         </p>
         <PainelSetorCliente etapasIniciais={comSolicitacao} />
-      </main>
+      </div>
+      </ShellInterno>
     </>
   );
 }

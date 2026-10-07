@@ -54,7 +54,7 @@ export default function PaginaRefaturamento() {
 
   if (protocolo) {
     return (
-      <main className="flex-1 flex items-center justify-center px-4" style={{ background: "var(--ntk-osso)" }}>
+      <main className="flex-1 flex items-center justify-center px-4">
         <div className="ntk-card p-8 max-w-md w-full text-center">
           <MarcaNTK subtitulo="Refaturamento" />
           <div className="mt-6 mb-2 text-sm uppercase tracking-wide font-mono" style={{ color: "var(--ntk-verde)" }}>
@@ -79,7 +79,7 @@ export default function PaginaRefaturamento() {
   }
 
   return (
-    <main className="flex-1 px-4 py-8" style={{ background: "var(--ntk-osso)" }}>
+    <main className="flex-1 px-4 py-8">
       <div className="max-w-xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <MarcaNTK subtitulo="Refaturamento" />

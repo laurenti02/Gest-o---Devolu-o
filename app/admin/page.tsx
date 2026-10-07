@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 import { getSessao, PERFIS_ADM, PERFIS_APROVACAO } from "@/lib/auth";
 import { db, schema } from "@/lib/db";
 import { STATUS_LABEL, SETOR_LABEL, estaAtrasado } from "@/lib/fluxo";
-import { TopoInterno } from "@/components/TopoInterno";
-import { NavInterna } from "@/components/NavInterna";
+import { ShellInterno } from "@/components/ShellInterno";
+import { StatusPill } from "@/components/StatusPill";
 import Link from "next/link";
 
 export default async function PainelAdmin() {
@@ -22,9 +22,8 @@ export default async function PainelAdmin() {
 
   return (
     <>
-      <TopoInterno nome={sessao.nome} perfil={sessao.perfil} subtitulo="Painel ADM" />
-      <NavInterna perfil={sessao.perfil} />
-      <main className="flex-1 max-w-6xl mx-auto px-4 py-6 w-full" style={{ background: "var(--ntk-osso)" }}>
+      <ShellInterno nome={sessao.nome} perfil={sessao.perfil} subtitulo="Painel ADM" >
+      <div className="ntk-view">
         <h1 className="font-display text-2xl font-bold mb-1">Visão geral</h1>
         <p className="text-sm text-neutral-600 mb-6">
           Acompanhamento completo do processo após as aprovações obrigatórias.
@@ -49,7 +48,7 @@ export default async function PainelAdmin() {
         </div>
 
         <div className="ntk-card overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="ntk-table w-full text-sm">
             <thead>
               <tr className="border-b text-left" style={{ borderColor: "var(--ntk-borda)" }}>
                 <th className="p-3 font-mono text-xs uppercase text-neutral-500">Protocolo</th>
@@ -64,7 +63,7 @@ export default async function PainelAdmin() {
                 <tr key={s.id} className="border-b last:border-0" style={{ borderColor: "var(--ntk-borda)" }}>
                   <td className="p-3 font-mono">{s.protocolo}</td>
                   <td className="p-3">{s.empresa}</td>
-                  <td className="p-3">{STATUS_LABEL[s.status] ?? s.status}</td>
+                  <td className="p-3"><StatusPill status={s.status} rotulo={STATUS_LABEL[s.status] ?? s.status} /></td>
                   <td className="p-3">{s.etapaAtual ? SETOR_LABEL[s.etapaAtual] ?? s.etapaAtual : "—"}</td>
                   <td className="p-3">{s.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
                 </tr>
@@ -79,16 +78,17 @@ export default async function PainelAdmin() {
             </tbody>
           </table>
         </div>
-      </main>
+      </div>
+      </ShellInterno>
     </>
   );
 }
 
 function Indicador({ rotulo, valor, cor }: { rotulo: string; valor: number; cor?: string }) {
   return (
-    <div className="ntk-card p-4">
-      <p className="text-xs text-neutral-500 mb-1">{rotulo}</p>
-      <p className="font-display text-2xl font-bold" style={{ color: cor || "var(--ntk-preto)" }}>
+    <div className="ntk-card ntk-kpi">
+      <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">{rotulo}</p>
+      <p className="ntk-kpi-valor" style={{ color: cor || "var(--ntk-preto)" }}>
         {valor}
       </p>
     </div>

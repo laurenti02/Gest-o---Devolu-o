@@ -87,7 +87,7 @@ export default function PaginaProtocolo() {
   }
 
   return (
-    <main className="flex-1 px-4 py-8" style={{ background: "var(--ntk-osso)" }}>
+    <main className="flex-1 px-4 py-8">
       <div className="max-w-xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <MarcaNTK subtitulo="Controle de Devoluções" />

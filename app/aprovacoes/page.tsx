@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 import { getSessao, PERFIS_APROVACAO } from "@/lib/auth";
 import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { TopoInterno } from "@/components/TopoInterno";
-import { NavInterna } from "@/components/NavInterna";
+import { ShellInterno } from "@/components/ShellInterno";
 import { ListaAprovacoes } from "./ListaAprovacoes";
 
 export default async function PaginaAprovacoes() {
@@ -25,15 +24,15 @@ export default async function PaginaAprovacoes() {
 
   return (
     <>
-      <TopoInterno nome={sessao.nome} perfil={sessao.perfil} subtitulo="Aprovações" />
-      <NavInterna perfil={sessao.perfil} />
-      <main className="flex-1 max-w-6xl mx-auto px-4 py-6 w-full" style={{ background: "var(--ntk-osso)" }}>
+      <ShellInterno nome={sessao.nome} perfil={sessao.perfil} subtitulo="Aprovações" >
+      <div className="ntk-view">
         <h1 className="font-display text-2xl font-bold mb-1">Fila de aprovações</h1>
         <p className="text-sm text-neutral-600 mb-6">
           Governança obrigatória: cada solicitação só avança após aprovação da Diretoria e do Gerente.
         </p>
         <ListaAprovacoes solicitacoesIniciais={comDecisoes} emailUsuario={sessao.email} />
-      </main>
+      </div>
+      </ShellInterno>
     </>
   );
 }
