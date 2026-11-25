@@ -38,7 +38,7 @@ export default function StatusProtocoloRefaturamento() {
       <div className="ntk-card p-8 max-w-lg w-full">
         <MarcaNTK subtitulo="Refaturamento" />
         {erro && (
-          <div className="mt-6 text-sm px-3 py-2 rounded" style={{ background: "#fbe9e5", color: "var(--ntk-vermelho)" }}>
+          <div className="mt-6 text-sm px-3 py-2 rounded" style={{ background: "var(--ntk-bad-bg)", color: "var(--ntk-vermelho)" }}>
             {erro}
           </div>
         )}

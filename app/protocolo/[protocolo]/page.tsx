@@ -101,7 +101,7 @@ export default function PaginaProtocolo() {
 
           {!carregando && erro && (
             <div>
-              <p className="text-sm px-3 py-2 rounded" style={{ background: "#fbe9e5", color: "var(--ntk-vermelho)" }}>
+              <p className="text-sm px-3 py-2 rounded" style={{ background: "var(--ntk-bad-bg)", color: "var(--ntk-vermelho)" }}>
                 {erro}
               </p>
               <Link href="/ja-solicitei" className="text-sm underline underline-offset-4 mt-4 inline-block">
@@ -168,7 +168,7 @@ export default function PaginaProtocolo() {
                     <p
                       className="text-sm px-3 py-2 rounded mt-3"
                       style={{
-                        background: msgNf.tipo === "ok" ? "#eaf4ec" : "#fbe9e5",
+                        background: msgNf.tipo === "ok" ? "var(--ntk-ok-bg)" : "var(--ntk-bad-bg)",
                         color: msgNf.tipo === "ok" ? "var(--ntk-verde)" : "var(--ntk-vermelho)",
                       }}
                     >

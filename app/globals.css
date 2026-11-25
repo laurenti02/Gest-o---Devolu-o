@@ -1,29 +1,49 @@
 @import "tailwindcss";
 
 /* Visual igual ao do Planner: azul escuro, laranja, preto e branco */
+/* Visual igual ao app "Notas de Devolução": azul-marinho escuro, laranja, vidro */
 :root {
-  --ntk-preto: #0a0f1a;
-  --ntk-preto-suave: #0b1f3a;
+  --ntk-bg: #060a14;
+  --ntk-surface-solid: #0b1324;
+  --ntk-surface-2: rgba(255, 255, 255, 0.055);
+  --ntk-mute: #93a0b8;
+  /* --ntk-preto passa a ser a cor do TEXTO (claro); os fundos escuros usam --ntk-bg */
+  --ntk-preto: #f5f2ee;
+  --ntk-preto-suave: #93a0b8;
   --ntk-branco: #ffffff;
-  --ntk-osso: #f3f6fa;
-  --ntk-laranja: #ff7a1a;
-  --ntk-laranja-forte: #e8600a;
-  --ntk-amarelo: #ff9a3d;
-  --ntk-borda: rgba(10, 15, 26, 0.14);
-  --ntk-verde: #2f5d4e;
-  --ntk-vermelho: #a23b2e;
-  --ntk-azul: #0b1f3a;
-  --ntk-sombra: 0 1px 2px rgba(20, 20, 20, 0.08), 0 4px 14px rgba(20, 20, 20, 0.08);
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --ntk-osso: #060a14;
+  --ntk-laranja: #ff8a3d;
+  --ntk-laranja-forte: #ff9a52;
+  --ntk-amarelo: #ffa257;
+  --ntk-accent-ink: #1a0a00;
+  --ntk-accent-soft: rgba(255, 138, 61, 0.12);
+  --ntk-grad: linear-gradient(135deg, #ffa257 0%, #f26b1d 100%);
+  --ntk-borda: rgba(255, 255, 255, 0.09);
+  --ntk-borda-quente: rgba(255, 140, 64, 0.3);
+  --ntk-verde: #44d68e;
+  --ntk-ok-bg: rgba(68, 214, 142, 0.14);
+  --ntk-vermelho: #ff6672;
+  --ntk-bad-bg: rgba(255, 102, 114, 0.14);
+  --ntk-azul: #7ea5ff;
+  --ntk-sombra: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --font-display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
 }
 
 body {
-  background: var(--ntk-osso);
+  background-color: var(--ntk-bg);
+  background-image:
+    radial-gradient(900px 520px at 85% -5%, rgba(255, 138, 61, 0.16), transparent 60%),
+    radial-gradient(800px 500px at -5% 105%, rgba(60, 90, 170, 0.18), transparent 60%);
+  background-attachment: fixed;
   color: var(--ntk-preto);
   font-family: var(--font-body);
 }
+a { color: var(--ntk-laranja-forte); }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.7) sepia(1) saturate(4) hue-rotate(-15deg); cursor: pointer; }
+.text-neutral-500, .text-neutral-600, .text-neutral-700 { color: var(--ntk-mute); }
 
 .font-display { font-family: var(--font-display); }
 .font-mono { font-family: var(--font-mono); }
@@ -34,7 +54,8 @@ body {
 .ntk-side {
   width: 236px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, var(--ntk-preto) 0%, var(--ntk-preto-suave) 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+  border-right: 1px solid var(--ntk-borda);
   padding: 28px 0 20px 0;
   display: flex;
   flex-direction: column;
@@ -44,7 +65,7 @@ body {
 }
 .ntk-side-brand {
   padding: 0 22px 22px 22px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--ntk-borda);
   margin-bottom: 14px;
 }
 .ntk-side-logo {
@@ -62,14 +83,14 @@ body {
   font-size: 15px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #ffb27a;
+  color: var(--ntk-laranja-forte);
   margin-bottom: 4px;
 }
 .ntk-side-title {
   font-family: var(--font-display);
   font-size: 21px;
-  font-weight: 600;
-  color: #fff;
+  font-weight: 700;
+  color: var(--ntk-preto);
   line-height: 1.25;
 }
 .ntk-side-nav {
@@ -89,26 +110,24 @@ body {
   font-weight: 500;
   letter-spacing: 0.01em;
   width: 100%;
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
   transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
 }
-.ntk-side-link:hover { background: rgba(255, 255, 255, 0.07); }
+.ntk-side-link:hover { background: rgba(255, 255, 255, 0.06); color: var(--ntk-preto); }
 .ntk-side-link[aria-current="page"] {
-  background: #fff;
-  color: var(--ntk-preto);
-  transform: translateX(10px);
+  background: var(--ntk-accent-soft);
+  color: var(--ntk-laranja-forte);
   font-weight: 600;
-  box-shadow: -6px 0 14px rgba(0, 0, 0, 0.18);
+  box-shadow: inset 3px 0 0 var(--ntk-laranja);
 }
 .ntk-side-foot {
   padding: 16px 22px 0 22px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--ntk-borda);
   margin-top: 14px;
 }
 .ntk-side-user {
   font-size: 12.5px;
   font-weight: 600;
-  color: #fff;
+  color: var(--ntk-preto);
   margin-bottom: 2px;
   display: flex;
   align-items: center;
@@ -123,27 +142,28 @@ body {
 }
 .ntk-side-role {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--ntk-mute);
   margin-bottom: 10px;
 }
 .ntk-side-sair {
   font-size: 11.5px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--ntk-preto);
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid var(--ntk-borda-quente);
   border-radius: 6px;
   padding: 6px 10px;
   cursor: pointer;
   width: 100%;
 }
-.ntk-side-sair:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.ntk-side-sair:hover { background: var(--ntk-accent-soft); }
 
-.ntk-content { flex: 1; min-width: 0; background: var(--ntk-osso); min-height: 100vh; }
+.ntk-content { flex: 1; min-width: 0; background: transparent; min-height: 100vh; }
 .ntk-topbar {
   padding: 22px 36px;
-  background: #fff;
-  border-bottom: 1px solid var(--ntk-borda);
+  background: rgba(6, 10, 20, 0.72);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--ntk-borda-quente);
   position: sticky;
   top: 0;
   z-index: 5;
@@ -151,7 +171,7 @@ body {
 .ntk-topbar-title {
   font-family: var(--font-display);
   font-size: 26px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ntk-preto);
 }
 .ntk-topbar-date {
@@ -168,8 +188,7 @@ body {
   .ntk-side { width: 100%; height: auto; position: relative; padding: 14px 10px; }
   .ntk-side-brand, .ntk-side-foot { display: none; }
   .ntk-side-nav { flex-direction: row; overflow-x: auto; }
-  .ntk-side-link { clip-path: none; border-radius: 8px; white-space: nowrap; min-height: 38px; width: auto; }
-  .ntk-side-link[aria-current="page"] { transform: none; }
+  .ntk-side-link { border-radius: 8px; white-space: nowrap; min-height: 38px; width: auto; }
   .ntk-topbar { padding: 16px 18px; }
   .ntk-view { padding: 20px 16px 40px 16px; }
 }
@@ -177,65 +196,67 @@ body {
 /* ============ Tela de login (fundo escuro como o do Planner) ============ */
 .ntk-login {
   min-height: 100vh;
-  background:
-    radial-gradient(700px 420px at 80% 0%, rgba(255, 122, 26, 0.3), transparent 60%),
-    linear-gradient(180deg, var(--ntk-preto) 0%, var(--ntk-preto-suave) 100%);
+  background: transparent;
 }
 .ntk-login .ntk-card {
   border-radius: 14px;
-  border: none;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--ntk-borda-quente);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
 /* ============ Cartões ============ */
 .ntk-card {
-  background: #fff;
-  border: 1px solid var(--ntk-borda);
-  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border: 1px solid var(--ntk-borda-quente);
+  border-radius: 14px;
   box-shadow: var(--ntk-sombra);
+  backdrop-filter: blur(8px);
 }
 
 /* Indicadores */
 .ntk-kpi { padding: 16px 18px; }
 .ntk-kpi-valor {
-  font-family: var(--font-mono);
-  font-size: 25px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
   line-height: 1.1;
 }
 
 /* ============ Botões ============ */
 .ntk-btn-primary {
-  background: var(--ntk-preto);
-  color: #fff;
-  border-radius: 7px;
-  font-weight: 600;
+  background: var(--ntk-grad);
+  color: var(--ntk-accent-ink);
+  border-radius: 10px;
+  font-weight: 700;
   transition: background 0.15s ease, transform 0.1s ease;
 }
-.ntk-btn-primary:hover:not(:disabled) { background: var(--ntk-laranja-forte); }
+.ntk-btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
 .ntk-btn-primary:active:not(:disabled) { transform: scale(0.97); }
 .ntk-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .ntk-btn-outline {
-  background: #fff;
-  border: 1px solid var(--ntk-borda);
+  background: var(--ntk-surface-2);
+  border: 1px solid var(--ntk-borda-quente);
   color: var(--ntk-preto);
-  border-radius: 7px;
+  border-radius: 10px;
   font-weight: 600;
   transition: background 0.15s ease, transform 0.1s ease;
 }
-.ntk-btn-outline:hover { background: #e8edf5; }
+.ntk-btn-outline:hover { background: var(--ntk-accent-soft); }
 .ntk-btn-outline:active { transform: scale(0.97); }
 
 /* ============ Campos ============ */
 .ntk-input {
   border: 1px solid var(--ntk-borda);
-  border-radius: 7px;
-  background: #fff;
+  border-radius: 10px;
+  background: var(--ntk-surface-2);
+  color: var(--ntk-preto);
   padding: 0.6rem 0.75rem;
   width: 100%;
 }
-.ntk-input:focus { outline: 2px solid var(--ntk-laranja); outline-offset: -1px; }
+.ntk-input:focus { outline: 2px solid var(--ntk-laranja); outline-offset: -1px; background: rgba(255,255,255,.08); }
+.ntk-input::placeholder { color: var(--ntk-mute); }
+.ntk-input option { background: var(--ntk-surface-solid); color: var(--ntk-preto); }
 
 /* ============ Etiquetas e status ============ */
 .ntk-tag {
@@ -258,26 +279,28 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
-  background: #e8edf5;
-  color: var(--ntk-preto-suave);
+  background: rgba(255,255,255,.08);
+  color: var(--ntk-preto);
 }
-.ntk-pill-ok   { background: #e3ece7; color: var(--ntk-verde); }
-.ntk-pill-bad  { background: #f3e3e0; color: var(--ntk-vermelho); }
-.ntk-pill-warn { background: #fce3d2; color: var(--ntk-laranja-forte); }
-.ntk-pill-info { background: #e1e7f0; color: var(--ntk-preto-suave); }
+.ntk-pill-ok   { background: var(--ntk-ok-bg); color: var(--ntk-verde); }
+.ntk-pill-bad  { background: var(--ntk-bad-bg); color: var(--ntk-vermelho); }
+.ntk-pill-warn { background: var(--ntk-accent-soft); color: var(--ntk-laranja-forte); }
+.ntk-pill-info { background: rgba(126,165,255,.14); color: var(--ntk-azul); }
 
 /* ============ Tabelas ============ */
 .ntk-table { border-collapse: collapse; }
 .ntk-table thead th {
-  background: var(--ntk-preto);
-  color: #fff !important;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ntk-laranja) !important;
+  font-family: var(--font-display);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   white-space: nowrap;
-  border-bottom: 2px solid var(--ntk-laranja) !important;
+  border-bottom: 1px solid var(--ntk-borda-quente) !important;
 }
-.ntk-table tbody tr:nth-child(even) { background: #eef2f8; }
-.ntk-table tbody tr:hover { background: #fde9da; }
+.ntk-table tbody tr:nth-child(even) { background: rgba(255,255,255,.015); }
+.ntk-table tbody tr:hover { background: var(--ntk-accent-soft); }
 
-::selection { background: #ffb27a; color: var(--ntk-preto); }
+::selection { background: var(--ntk-laranja); color: var(--ntk-accent-ink); }

@@ -71,7 +71,7 @@ function LoginForm() {
             required
           />
           {erro && (
-            <div className="text-sm px-3 py-2 rounded" style={{ background: "#fbe9e5", color: "var(--ntk-vermelho)" }}>
+            <div className="text-sm px-3 py-2 rounded" style={{ background: "var(--ntk-bad-bg)", color: "var(--ntk-vermelho)" }}>
               {erro}
             </div>
           )}

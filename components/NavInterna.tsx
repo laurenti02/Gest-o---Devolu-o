@@ -37,7 +37,7 @@ export function NavInterna({ perfil }: { perfil: string }) {
             className="px-3 py-1.5 rounded-t font-medium"
             style={
               ativo
-                ? { background: "#fff", color: "var(--ntk-preto)", border: "1px solid var(--ntk-borda)", borderBottom: "1px solid #fff" }
+                ? { background: "var(--ntk-accent-soft)", color: "var(--ntk-laranja-forte)", border: "1px solid var(--ntk-borda-quente)" }
                 : { color: "var(--ntk-preto-suave)" }
             }
           >

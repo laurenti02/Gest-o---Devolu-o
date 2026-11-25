@@ -4,8 +4,8 @@
   "description": "Controle de Solicitações de Devolução do Grupo Nautika",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fffdf9",
-  "theme_color": "#17130f",
+  "background_color": "#060a14",
+  "theme_color": "#060a14",
   "icons": [
     { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }
   ]

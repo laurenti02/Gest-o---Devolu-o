@@ -23,7 +23,7 @@ export function TopoInterno({
   }
 
   return (
-    <header className="border-b" style={{ borderColor: "var(--ntk-borda)", background: "#fff" }}>
+    <header className="border-b" style={{ borderColor: "var(--ntk-borda)", background: "rgba(6,10,20,.72)", backdropFilter: "blur(10px)" }}>
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/admin">
           <MarcaNTK subtitulo={subtitulo} />
