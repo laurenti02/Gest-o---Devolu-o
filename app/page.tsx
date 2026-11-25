@@ -14,8 +14,22 @@ const CAMPOS_INICIAIS = {
   motivo: "",
 };
 
+const MOTIVOS = [
+  "Acordo Comercial",
+  "Arrependimento",
+  "Envio Incorreto",
+  "Faturamento Incorreto - Fiscal",
+  "Item Faltante",
+  "Pedido Incorreto",
+  "Produto Avariado",
+  "Refaturamento - Dados Cadastrais Incorretos",
+  "Retorno Transportadora - Falha na entrega",
+];
+
 export default function PaginaInicial() {
   const [campos, setCampos] = useState(CAMPOS_INICIAIS);
+  const [motivoOutro, setMotivoOutro] = useState(false);
+  const [motivoOutroTexto, setMotivoOutroTexto] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
@@ -23,11 +37,16 @@ export default function PaginaInicial() {
 
   function atualizar(campo: keyof typeof CAMPOS_INICIAIS, valor: string) {
     setCampos((c) => ({ ...c, [campo]: valor }));
+    setErro(null);
   }
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
     setErro(null);
+    if (!campos.motivo.trim()) {
+      setErro("Escolha o motivo da devolução.");
+      return;
+    }
     setEnviando(true);
     try {
       const resp = await fetch("/api/solicitacoes", {
@@ -42,6 +61,8 @@ export default function PaginaInicial() {
       }
       setProtocolo(dados.protocolo);
       setCampos(CAMPOS_INICIAIS);
+      setMotivoOutro(false);
+      setMotivoOutroTexto("");
     } catch {
       setErro("Falha de conexão. Verifique sua internet e tente novamente.");
     } finally {
@@ -130,15 +151,53 @@ export default function PaginaInicial() {
               onChange={(v) => atualizar("valor", v)}
               tipo="number"
             />
-            <div>
-              <label className="text-sm font-medium block mb-1">Descrição do motivo</label>
-              <textarea
-                className="ntk-input min-h-[100px]"
-                value={campos.motivo}
-                onChange={(e) => atualizar("motivo", e.target.value)}
-                required
-              />
-            </div>
+            <fieldset>
+              <legend className="text-sm font-medium mb-2">
+                Motivo da devolução <span style={{ color: "var(--ntk-vermelho)" }}>*</span>
+              </legend>
+              <div className="flex flex-col gap-2">
+                {MOTIVOS.map((m) => (
+                  <label key={m} className="flex items-center gap-3 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="motivo"
+                      className="accent-[var(--ntk-laranja)] w-4 h-4"
+                      checked={!motivoOutro && campos.motivo === m}
+                      onChange={() => {
+                        setMotivoOutro(false);
+                        atualizar("motivo", m);
+                      }}
+                    />
+                    {m}
+                  </label>
+                ))}
+                <label className="flex items-center gap-3 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    name="motivo"
+                    className="accent-[var(--ntk-laranja)] w-4 h-4"
+                    checked={motivoOutro}
+                    onChange={() => {
+                      setMotivoOutro(true);
+                      atualizar("motivo", motivoOutroTexto.trim() ? `Outro: ${motivoOutroTexto.trim()}` : "");
+                    }}
+                  />
+                  Outro
+                </label>
+                {motivoOutro && (
+                  <input
+                    className="ntk-input"
+                    placeholder="Descreva o motivo"
+                    value={motivoOutroTexto}
+                    onChange={(e) => {
+                      setMotivoOutroTexto(e.target.value);
+                      atualizar("motivo", e.target.value.trim() ? `Outro: ${e.target.value.trim()}` : "");
+                    }}
+                    autoFocus
+                  />
+                )}
+              </div>
+            </fieldset>
 
             {erro && (
               <div
