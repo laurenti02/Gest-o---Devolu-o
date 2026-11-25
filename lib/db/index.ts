@@ -8,7 +8,11 @@ let _db: DrizzleDb | null = null;
 
 function getDb(): DrizzleDb {
   if (!_db) {
-    const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+    // Prefere a connection string com pooling (ex.: integração Prisma Postgres
+    // na Vercel expõe DATABASE_URL_POOLED) — evita esgotar conexões diretas
+    // com muitas funções serverless rodando ao mesmo tempo. Cai para a direta
+    // se não houver uma versão com pool configurada.
+    const url = process.env.DATABASE_URL_POOLED || process.env.DATABASE_URL || process.env.POSTGRES_URL;
     if (!url) throw new Error("DATABASE_URL não configurada");
     const local = /localhost|127\.0\.0\.1/.test(url);
     const client = postgres(url, {
