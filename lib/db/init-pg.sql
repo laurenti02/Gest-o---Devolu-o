@@ -1,41 +1,41 @@
 CREATE TABLE IF NOT EXISTS usuarios (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   senha_hash TEXT NOT NULL,
   perfil TEXT NOT NULL,
-  ativo INTEGER NOT NULL DEFAULT 1,
-  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  ativo BOOLEAN NOT NULL DEFAULT true,
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS solicitacoes (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   protocolo TEXT NOT NULL UNIQUE,
   empresa TEXT NOT NULL,
   cnpj TEXT NOT NULL,
   nome_solicitante TEXT NOT NULL,
   responsavel_regional TEXT NOT NULL,
   nf_origem TEXT NOT NULL,
-  valor REAL NOT NULL,
+  valor DOUBLE PRECISION NOT NULL,
   motivo TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'aguardando_aprovacao',
   etapa_atual TEXT,
-  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+  atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS aprovacoes (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   solicitacao_id INTEGER NOT NULL REFERENCES solicitacoes(id),
   aprovador_email TEXT NOT NULL,
   aprovador_nome TEXT NOT NULL,
   decisao TEXT NOT NULL,
   comentario TEXT,
-  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS etapas (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   solicitacao_id INTEGER NOT NULL REFERENCES solicitacoes(id),
   setor TEXT NOT NULL,
   ordem INTEGER NOT NULL,
@@ -45,11 +45,11 @@ CREATE TABLE IF NOT EXISTS etapas (
   prazo_horas_uteis INTEGER NOT NULL,
   prazo_limite TEXT,
   concluido_em TEXT,
-  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS anexos_nf (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   solicitacao_id INTEGER NOT NULL REFERENCES solicitacoes(id),
   arquivo_nome TEXT NOT NULL,
   arquivo_path TEXT NOT NULL,
@@ -57,31 +57,31 @@ CREATE TABLE IF NOT EXISTS anexos_nf (
   numero_nota TEXT,
   cliente_lido TEXT,
   cnpj_lido TEXT,
-  valor_total_lido REAL,
+  valor_total_lido DOUBLE PRECISION,
   itens_json TEXT,
   inconsistencias TEXT,
   status TEXT NOT NULL DEFAULT 'processando',
-  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS historico (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   solicitacao_id INTEGER REFERENCES solicitacoes(id),
   usuario TEXT NOT NULL,
   acao TEXT NOT NULL,
   comentario TEXT,
-  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS refat_solicitacoes (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   protocolo TEXT NOT NULL UNIQUE,
   solicitante TEXT NOT NULL,
   setor_solicitante TEXT NOT NULL,
   cliente_original TEXT NOT NULL,
   cnpj_original TEXT NOT NULL,
   nota_fiscal_original TEXT NOT NULL,
-  valor REAL NOT NULL,
+  valor DOUBLE PRECISION NOT NULL,
   mercadoria_saiu TEXT NOT NULL,
   novo_destinatario TEXT,
   novo_cnpj TEXT,
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS refat_solicitacoes (
   log_concluido_em TEXT,
   log_concluido_por TEXT,
   fiscal_chave_nf_entrada TEXT,
-  fiscal_precisa_sefaz INTEGER NOT NULL DEFAULT 0,
+  fiscal_precisa_sefaz BOOLEAN NOT NULL DEFAULT false,
   fiscal_protocolo_sefaz TEXT,
   fiscal_chave_nova_nfe TEXT,
   fiscal_comentario TEXT,
@@ -105,32 +105,32 @@ CREATE TABLE IF NOT EXISTS refat_solicitacoes (
   fin_comentario TEXT,
   fin_concluido_em TEXT,
   fin_concluido_por TEXT,
-  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+  atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS refat_historico (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   refaturamento_id INTEGER REFERENCES refat_solicitacoes(id),
   usuario TEXT NOT NULL,
   acao TEXT NOT NULL,
   comentario TEXT,
-  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS planner_usuarios (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   senha_hash TEXT NOT NULL,
-  criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS planner_dados (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   usuario_id INTEGER NOT NULL UNIQUE REFERENCES planner_usuarios(id) ON DELETE CASCADE,
-  dados TEXT NOT NULL,
-  atualizado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  dados JSONB NOT NULL,
+  atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_solicitacoes_protocolo ON solicitacoes(protocolo);

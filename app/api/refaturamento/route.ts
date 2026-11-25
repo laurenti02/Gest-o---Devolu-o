@@ -40,9 +40,9 @@ export async function POST(req: NextRequest) {
       novoCnpj: novoCnpj ? String(novoCnpj).trim() : null,
       motivo: String(motivo).trim(),
       status: "aguardando_aprovacao",
-    });
+    }).returning({ id: schema.refaturamentos.id });
 
-    const id = Number(inserted.lastInsertRowid);
+    const id = Number(inserted[0].id);
     const protocolo = gerarProtocoloRefaturamento(id);
     await db.update(schema.refaturamentos).set({ protocolo }).where(eq(schema.refaturamentos.id, id));
 

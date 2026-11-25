@@ -35,9 +35,10 @@ export async function POST(req: NextRequest) {
         valor: valorNumerico,
         motivo: String(motivo).trim(),
         status: "aguardando_aprovacao",
-      });
+      })
+      .returning({ id: schema.solicitacoes.id });
 
-    const id = Number(inserted.lastInsertRowid);
+    const id = Number(inserted[0].id);
     const protocolo = gerarProtocolo(id);
 
     await db.update(schema.solicitacoes)

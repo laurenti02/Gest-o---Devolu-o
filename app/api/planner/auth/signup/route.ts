@@ -23,8 +23,8 @@ export async function POST(req: NextRequest) {
       nome: String(name).trim(),
       email: emailNorm,
       senhaHash,
-    });
-    const userId = Number(inserted.lastInsertRowid);
+    }).returning({ id: schema.plannerUsuarios.id });
+    const userId = Number(inserted[0].id);
 
     await db.insert(schema.plannerDados).values({
       usuarioId: userId,

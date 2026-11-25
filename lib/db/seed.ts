@@ -1,21 +1,16 @@
-import { createClient } from "@libsql/client";
+import postgres from "postgres";
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 
-// Usa o Turso quando as variáveis de ambiente estiverem definidas
-// (mesma lógica de lib/db/index.ts). Sem elas, cai no arquivo local
-// só para desenvolvimento.
-const tursoUrl = process.env.TURSO_DATABASE_URL;
-let dbPath = "";
-const client = tursoUrl
-  ? createClient({ url: tursoUrl, authToken: process.env.TURSO_AUTH_TOKEN })
-  : (() => {
-      const dataDir = path.join(process.cwd(), "data");
-      if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-      dbPath = path.join(dataDir, "devolucoes.db");
-      return createClient({ url: `file:${dbPath}` });
-    })();
+const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+if (!url) {
+  console.error("Defina DATABASE_URL (ou POSTGRES_URL) antes de rodar o seed.");
+  process.exit(1);
+}
+const dbUrl: string = url;
+const local = /localhost|127\.0\.0\.1/.test(dbUrl);
+const sql = postgres(dbUrl, { max: 1, prepare: false, ssl: local ? false : "require" });
 
 const SENHA_PADRAO = "nautika@2026";
 
@@ -44,31 +39,29 @@ const usuarios: Usuario[] = [
 ];
 
 async function main() {
-  const initSql = fs.readFileSync(path.join(process.cwd(), "lib", "db", "init.sql"), "utf-8");
+  const initSql = fs.readFileSync(path.join(process.cwd(), "lib", "db", "init-pg.sql"), "utf-8");
   const statements = initSql
     .split(";")
     .map((s) => s.trim())
     .filter(Boolean);
   for (const stmt of statements) {
-    await client.execute(stmt);
+    await sql.unsafe(stmt);
   }
 
   const hash = bcrypt.hashSync(SENHA_PADRAO, 10);
 
   for (const u of usuarios) {
-    await client.execute({
-      sql: `INSERT OR IGNORE INTO usuarios (nome, email, senha_hash, perfil) VALUES (?, ?, ?, ?)`,
-      args: [u.nome, u.email, hash, u.perfil],
-    });
+    await sql`
+      INSERT INTO usuarios (nome, email, senha_hash, perfil)
+      VALUES (${u.nome}, ${u.email}, ${hash}, ${u.perfil})
+      ON CONFLICT (email) DO NOTHING
+    `;
   }
 
-  if (tursoUrl) {
-    console.log(`Banco inicializado no Turso: ${tursoUrl}`);
-  } else {
-    console.log(`Banco inicializado em ${dbPath} (arquivo local — TURSO_DATABASE_URL não foi definida)`);
-  }
+  console.log(`Banco inicializado em: ${dbUrl.replace(/:[^:@]*@/, ":****@")}`);
   console.log(`${usuarios.length} usuários criados/verificados.`);
   console.log(`Senha padrão para todos (trocar depois): ${SENHA_PADRAO}`);
+  await sql.end();
 }
 
 main().catch((e) => {

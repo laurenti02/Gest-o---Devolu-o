@@ -1,8 +1,6 @@
-import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
+import postgres from "postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
-import path from "path";
-import fs from "fs";
 
 type DrizzleDb = ReturnType<typeof drizzle<typeof schema>>;
 
@@ -10,16 +8,15 @@ let _db: DrizzleDb | null = null;
 
 function getDb(): DrizzleDb {
   if (!_db) {
-    // Se TURSO_DATABASE_URL estiver configurada (produção na Vercel), usa o banco
-    // remoto Turso. Caso contrário, cai para um arquivo SQLite local (dev/local).
-    const turso = process.env.TURSO_DATABASE_URL;
-    const client = turso
-      ? createClient({ url: turso, authToken: process.env.TURSO_AUTH_TOKEN })
-      : (() => {
-          const dataDir = path.join(process.cwd(), "data");
-          if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-          return createClient({ url: `file:${path.join(dataDir, "devolucoes.db")}` });
-        })();
+    const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+    if (!url) throw new Error("DATABASE_URL não configurada");
+    const local = /localhost|127\.0\.0\.1/.test(url);
+    const client = postgres(url, {
+      max: 3,
+      prepare: false,
+      ssl: local ? false : "require",
+      idle_timeout: 20,
+    });
     _db = drizzle(client, { schema });
   }
   return _db;
