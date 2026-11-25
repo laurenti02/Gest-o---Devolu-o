@@ -1,41 +1,25 @@
 {
-  "name": "devolucoes-nautika",
-  "version": "0.1.0",
+  "name": "planner-nautika",
+  "version": "1.0.0",
   "private": true,
+  "type": "commonjs",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "db:seed": "tsx lib/db/seed.ts"
+    "dev": "node server.js",
+    "start": "node server.js",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev"
   },
   "dependencies": {
-    "@libsql/client": "^0.17.4",
-    "@vercel/blob": "^2.8.0",
-    "bcryptjs": "^3.0.3",
-    "drizzle-orm": "^0.45.2",
-    "fast-xml-parser": "^5.11.0",
-    "jose": "^6.2.10",
-    "next": "16.3.2",
-    "pdf-parse": "^2.4.5",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "xlsx": "^0.18.5"
+    "@prisma/client": "^5.20.0",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "drizzle-kit": "^0.31.10",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.2",
-    "tailwindcss": "^4",
-    "tsx": "^4.23.12",
-    "typescript": "^5"
-  },
-  "engines": {
-    "node": ">=20.9.0"
+    "prisma": "^5.20.0"
   }
 }

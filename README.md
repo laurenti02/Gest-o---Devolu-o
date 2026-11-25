@@ -1,228 +1,93 @@
-# NTK Devoluções — Grupo Nautika
+# Planner Administrativo Comercial — Grupo Nautika
 
-App web de Controle de Solicitações de Devolução: formulário público com protocolo,
-aprovação dupla obrigatória (Diretoria + Gerente), fluxo por setor com SLA, leitura
-inteligente da NF de devolução (XML NFe / PDF) e relatórios exportáveis (CSV/Excel).
+App web com login por e-mail/senha. Cada gestor tem sua própria conta e seus
+próprios dados, salvos num banco de dados na nuvem — acessível de qualquer
+computador, bastando abrir o link e entrar com e-mail e senha.
 
-Construído fora do Power Apps/Dataverse para ter deploy e evolução rápidos: Next.js +
-Drizzle ORM + SQLite (troca simples para Postgres quando for para produção — ver abaixo).
+## O que tem aqui
+- `app.js` — o app (Node + Express): rotas, API, servidor de arquivos
+- `server.js` — liga o app numa porta fixa (usado no Railway/local)
+- `api/index.js` + `vercel.json` — ponto de entrada usado só quando hospedado no Vercel
+- `routes/auth.js` — cadastro, login, logout, troca de senha
+- `routes/planner.js` — carregar/salvar os dados do planner de cada usuário
+- `prisma/schema.prisma` — estrutura do banco (usuários + dados do planner)
+- `public/index.html` — o app (mesma interface que você já aprovou, agora
+  conectada ao servidor em vez de salvar só no navegador)
 
-## Planner Administrativo Comercial (também no mesmo app, login separado)
+## Como publicar (Railway — recomendado, mesmo serviço usado no NexoNetiq)
 
-Terceiro módulo dentro do mesmo projeto/banco/deploy. Diferente do Refaturamento, o
-Planner **não reaproveita** os perfis da Devolução — cada pessoa cria sua própria
-conta (nome, e-mail, senha), sem perfil fixo, exatamente como no app original.
-
-- **Acesso:** `/planner` — tela de login/cadastro própria.
-- **Sessão separada de verdade:** cookie `planner_session`, diferente do `ntk_session`
-  usado pela Devolução/Refaturamento. Um não autentica no outro.
-- **Dados:** cada usuário tem seu próprio registro JSON (Painel, Metas, Agenda,
-  Planejamento semanal, Funil de vendas, Carteira de clientes, Tarefas administrativas)
-  nas tabelas `planner_usuarios` e `planner_dados`, no mesmo banco SQLite/libSQL.
-- **Controle de Cartão Corporativo removido** a pedido — não existe mais essa aba,
-  nem nos dados de contas novas, nem nos cálculos do Painel.
-- **Front-end:** é o mesmo HTML/CSS/JS do Planner original (não foi reescrito em
-  React) — servido em `/planner` via `app/planner/route.ts`, que lê
-  `public/planner-app.html` e devolve como página comum. Só as chamadas de API
-  internas foram redirecionadas para os novos endpoints (`/api/planner/...`).
-- **Teste automatizado:** `node test/test-e2e-planner.mjs` (com `npm start` já
-  rodando) — cobre cadastro, isolamento de sessão, salvar/carregar dados, troca de
-  senha e logout.
-
-## Refaturamento (novo módulo, mesmo app e mesmo banco)
-
-Fluxo separado, mas vivendo dentro deste mesmo projeto/banco/deploy — sem precisar de
-um serviço novo no Railway:
-
-**Fluxo:** ADM aprova → Logística regulariza a mercadoria → Fiscal emite os documentos
-→ Financeiro concilia e conclui.
-
-**Contas:** para simplificar, o Refaturamento reaproveita perfis que já existem na
-Devolução, sempre que é o mesmo time cuidando da mesma função:
-- **ADM** → mesmo perfil `admin` de sempre (devolucao@, leidiane.morais@, victoria.sturaro@)
-- **Fiscal** → mesmo perfil `entrada_nfd` de sempre (fiscal@, kaio.morais@, silvia.baroni@)
-- **Financeiro** → mesmo perfil `financeiro` de sempre (kaline@, financeirocreditoecobranca@)
-- **Logística** → única conta nova: `logistica@gruponautika.com.br` (perfil `logistica`)
-
-Todas usam a mesma senha padrão do sistema (`nautika@2026`).
-
-**Páginas:**
-- `/refaturamento` — formulário público (gera protocolo `REF-AAAA-NNNNNN`)
-- `/refaturamento/protocolo/[protocolo]` — status público
-- `/refaturamento/aprovacoes` — fila do ADM
-- `/refaturamento/painel` — fila de trabalho por etapa (Logística/Fiscal/Financeiro), ou tudo, se ADM
-
-**Tabelas:** `refat_solicitacoes` e `refat_historico`, no mesmo arquivo SQLite/banco
-libSQL da Devolução — nomes prefixados para nunca colidir com as tabelas existentes.
-
-**Teste automatizado:** `node test/test-e2e-refaturamento.mjs` (com o servidor já
-rodando em `npm start`) — cobre criação pública, as 4 contas, permissões cruzadas e
-persistência de cada etapa.
-
-## Como rodar na nuvem (Vercel + Turso — gratuito, sem cartão de crédito)
-
-O app guarda dados em SQLite (via libSQL) e os anexos de NF em arquivo. A Vercel não
-tem disco persistente (ambiente serverless), então em produção o app usa dois serviços
-externos gratuitos no lugar do disco: **Turso** (banco remoto, mesmo protocolo libSQL
-que o app já usa) e **Vercel Blob** (armazenamento de arquivos). Sem as variáveis de
-ambiente abaixo configuradas, o app cai automaticamente para arquivo local — então
-continua funcionando normalmente em desenvolvimento, só não persiste em produção sem
-elas.
-
-### 1. Criar o banco no Turso
-1. Crie uma conta em https://turso.tech (dá para entrar com GitHub).
-2. Instale a CLI do Turso e crie o banco:
-   ```bash
-   curl -sSfL https://get.tur.so/install.sh | bash
-   turso auth login
-   turso db create nautika-app
-   turso db show nautika-app --url
-   turso db tokens create nautika-app
+1. Crie um repositório no GitHub com esta pasta e suba o código.
+2. No [Railway](https://railway.app), clique em **New Project → Deploy from GitHub repo**
+   e selecione o repositório.
+3. Ainda no projeto, clique em **New → Database → PostgreSQL** para criar o banco.
+   O Railway já injeta a variável `DATABASE_URL` automaticamente no serviço do app
+   (confirme em **Variables** do serviço do app que ela está lá).
+4. No serviço do app, vá em **Variables** e adicione:
+   - `JWT_SECRET` → qualquer texto longo e aleatório (ex: gere em
+     https://1password.com/password-generator ou rode `openssl rand -hex 32`)
+   - `NODE_ENV` → `production`
+5. Em **Settings → Deploy**, confirme:
+   - Build command: `npm install` (o Railway detecta sozinho, mas pode confirmar)
+   - Start command: `npm start`
+6. Após o primeiro deploy, rode a migração do banco uma única vez. No Railway,
+   abra o serviço do app → **Settings → Deploy Logs** ou use o botão de terminal
+   (**Shell**) e rode:
    ```
-   Guarde a URL (começa com `libsql://...`) e o token gerados.
-3. Rode a criação das tabelas e o cadastro das contas iniciais **a partir do seu
-   computador**, apontando para o banco remoto:
-   ```bash
-   TURSO_DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." npm run db:seed
+   npx prisma migrate deploy
    ```
-   (No Windows/PowerShell: `$env:TURSO_DATABASE_URL="libsql://..."; $env:TURSO_AUTH_TOKEN="..."; npm run db:seed`)
+   Isso cria as tabelas `User` e `PlannerData` no Postgres.
+7. Em **Settings → Networking**, clique em **Generate Domain** para receber o
+   link público (algo como `planner-nautika.up.railway.app`). Esse é o link que
+   todo mundo na empresa vai usar.
 
-### 2. Criar o armazenamento de arquivos (Vercel Blob)
-Isso é feito depois do projeto já existir na Vercel (passo 3), direto pelo painel —
-veja a instrução no passo 4.
+## Como publicar (Vercel)
 
-### 3. Publicar na Vercel
-1. Crie uma conta em https://vercel.com (dá para entrar com GitHub).
-2. **Add New → Project**, selecione o repositório deste app no GitHub.
-3. A Vercel detecta Next.js automaticamente — não precisa mudar nada no build.
-4. Antes de clicar em "Deploy", abra **Environment Variables** e adicione:
-   ```
-   AUTH_SECRET=uma-chave-longa-e-aleatoria
-   TURSO_DATABASE_URL=libsql://... (a URL do passo 1)
-   TURSO_AUTH_TOKEN=... (o token do passo 1)
-   ```
-5. Clique em **Deploy** e espere terminar.
-6. No projeto já criado, vá em **Storage → Create Database → Blob**. A Vercel já
-   injeta a variável `BLOB_READ_WRITE_TOKEN` sozinha — não precisa copiar nada
-   manualmente. Isso dispara um novo deploy automático.
-7. Acesse o domínio que a Vercel gerou (tipo `seu-app.vercel.app`) — é ele que o time
-   vai usar.
+O Vercel só hospeda o app; o banco de dados (Postgres) continua no Railway —
+é só apontar o app para ele usando a URL **pública** do banco.
 
-Cada `git push` no repositório já publica uma nova versão sozinho — não precisa de
-nenhum comando manual depois do primeiro deploy.
+1. Entre em [vercel.com](https://vercel.com) e faça login (pode ser com a conta do GitHub).
+2. Clique em **Add New → Project** e selecione o repositório `Planner-Nautika`.
+3. Deixe o **Framework Preset** como `Other` e o **Build Command** em branco
+   (o Vercel instala e gera o Prisma Client sozinho via `npm install`).
+4. Antes de clicar em Deploy, abra **Environment Variables** e adicione:
+   - `DATABASE_URL` → a URL **pública** do Postgres do Railway (veja abaixo
+     como pegar essa URL — é diferente da que o app usa dentro do Railway)
+   - `JWT_SECRET` → qualquer texto longo e aleatório (pode ser um novo, diferente
+     do usado no Railway — quem estiver logado só vai precisar entrar de novo)
+   - `NODE_ENV` → `production`
+5. Clique em **Deploy** e espere terminar (1-2 minutos).
+6. Pegue o link que o Vercel gerou (algo como `planner-nautika.vercel.app`) —
+   esse é o novo link para a empresa usar.
 
-## Rodar no servidor da empresa (Windows)
+### Pegando a URL pública do Postgres no Railway
+No projeto do Railway, clique no serviço **Postgres** → aba **Variables** (ou
+**Connect**) → procure por `DATABASE_PUBLIC_URL` (ou a conexão listada como
+"Public Network"/TCP Proxy). Copie esse valor — ele começa com `postgresql://`
+e tem um endereço público (algo como `...railway.app:PORTA`), diferente do
+`postgres.railway.internal` que só funciona dentro do próprio Railway.
 
-Se preferir manter localmente em vez da nuvem, os arquivos `instalar-windows.bat` e
-`iniciar-servidor.bat` na raiz do projeto fazem a instalação e a inicialização.
+As tabelas já existem nesse banco (foram criadas quando publicamos no Railway),
+então não precisa rodar `prisma migrate` de novo — é só conectar.
 
-## Rodar localmente (desenvolvimento, qualquer sistema)
+## Como cada gestor usa
+1. Abre o link no navegador (celular, notebook, qualquer computador).
+2. Na primeira vez, clica em **"Criar meu planner"**, preenche nome, e-mail e senha.
+3. Da próxima vez, é só **entrar com e-mail e senha** — os dados aparecem
+   iguais, não importa de qual computador esteja acessando.
+4. Cada gestor só vê os próprios dados. Ninguém vê o planner de outra pessoa.
 
-Pré-requisitos: Node.js 20+.
-
-```bash
-npm install
-npm run db:seed      # cria o banco e os 16 usuários iniciais
-npm run dev           # http://localhost:3000
+## Rodando localmente para testar (opcional)
 ```
-
-Para rodar em modo produção:
-
-```bash
-npm run build
+npm install
+cp .env.example .env    # edite DATABASE_URL e JWT_SECRET
+npx prisma migrate dev  # cria as tabelas no banco local/de teste
 npm start
 ```
+Depois acesse `http://localhost:3000`.
 
-## Login e senha inicial
-
-Todos os usuários (Gabriela, Tiago, ADM, setores, etc.) foram criados com a senha:
-
-```
-nautika@2026
-```
-
-**Troque essa senha em produção.** Hoje a troca é feita direto no banco (gerando um
-novo hash com bcrypt); posso adicionar uma tela de "trocar senha" se quiser.
-
-Acesso interno: `/login`
-Formulário público: `/` (não exige login)
-
-## Perfis cadastrados
-
-| Perfil | E-mails |
-|---|---|
-| admin | devolucao@gruponautika.com.br, leidiane.morais@..., victoria.sturaro@... |
-| diretoria | gabriela@gruponautika.com.br |
-| gerente | tiago@gruponautika.com.br |
-| validacao_nfd | devolucaofiscal@..., kaio.morais@..., silvia.baroni@omniteca.io |
-| coleta | matheus.calixto@..., gabriel.vieira@..., joice.sousa@... |
-| recebimento | larissa.correia@..., recebimento.ntk@... |
-| entrada_nfd | fiscal@..., kaio.morais@..., silvia.baroni@omniteca.io |
-| financeiro | kaline@..., financeirocreditoecobranca@... |
-
-## Páginas
-
-- `/` — formulário público de solicitação (gera protocolo)
-- `/ja-solicitei` — busca de protocolo
-- `/protocolo/[protocolo]` — status público + upload da NF de devolução
-- `/login` — acesso interno
-- `/aprovacoes` — fila de aprovação (Diretoria, Gerente, ADM)
-- `/admin` — painel geral (ADM)
-- `/setor` — painel Kanban do setor logado (ou todos, se ADM)
-- `/relatorio` — indicadores + **download de relatório em CSV e Excel** + snapshot
-
-## Fluxo implementado
-
-1. Solicitante preenche o formulário → protocolo gerado.
-2. Fica bloqueado até aprovação da **Diretoria e do Gerente** (ambas obrigatórias).
-   Se qualquer um reprovar, a solicitação é encerrada como reprovada.
-3. Aprovado → solicitante anexa a NF de devolução na página do protocolo. O sistema
-   lê o XML NFe automaticamente (número, CNPJ, valor, itens) e sinaliza inconsistências
-   (ex.: CNPJ divergente, soma dos itens ≠ valor total). PDF usa leitura heurística por
-   texto; imagens ficam marcadas para conferência manual.
-4. A partir daí o fluxo passa pelos setores, cada um com SLA e prazo calculado em horas
-   úteis (seg-sex, 08h-18h): Validação NFD (8h) → Retorno ADM (4h) → Transportes (24h)
-   → Recebimento (24h) → Financeiro (24h). Cada setor conclui sua etapa no Kanban de
-   `/setor`, o que libera automaticamente a próxima.
-5. Tudo fica registrado no histórico (auditoria) por protocolo.
-
-## Relatórios
-
-Na página `/relatorio` (Diretoria, Gerente ou ADM):
-- Indicadores: total, aprovadas, reprovadas, pendentes, valor total aprovado.
-- Tabela com todas as solicitações e decisões.
-- **Baixar CSV** e **Baixar Excel** — download direto do relatório completo.
-- **Salvar snapshot** — grava um resumo no histórico com o marcador
-  `RELATORIO-APROVACOES`, para referência futura.
-
-## Banco de dados
-
-Usa SQLite via libSQL + Drizzle ORM — leve e sem dependência de compilação nativa. O
-schema está em `lib/db/schema.ts` e o SQL de criação em `lib/db/init.sql`.
-
-Dois modos, escolhidos automaticamente por `lib/db/index.ts` conforme as variáveis de
-ambiente:
-- **Sem `TURSO_DATABASE_URL` configurada** → usa um arquivo local (`data/devolucoes.db`).
-  Bom para desenvolvimento; não persiste em hospedagens sem disco persistente (Vercel).
-- **Com `TURSO_DATABASE_URL` configurada** → conecta no banco remoto Turso (mesmo
-  protocolo libSQL, nenhuma outra mudança de código). É o modo usado em produção na
-  Vercel — veja "Como rodar na nuvem" acima.
-
-## Variáveis de ambiente
-
-Crie um `.env.local` (veja `.env.local.example` para a lista completa com comentários):
-
-```
-AUTH_SECRET=uma-chave-secreta-longa-e-aleatoria
-TURSO_DATABASE_URL=            # vazio = usa arquivo local; preenchido = usa Turso
-TURSO_AUTH_TOKEN=
-BLOB_READ_WRITE_TOKEN=         # vazio = salva anexos em public/uploads; preenchido = usa Vercel Blob
-```
-
-## Próximos passos sugeridos
-
-- Tela de troca de senha / gestão de usuários pelo ADM (a Devolução ainda não tem;
-  o Planner já tem, em `/planner`).
-- Notificações por e-mail nas mudanças de etapa (hoje fica só no histórico do app).
-- Leitura inteligente de PDF/imagem via IA (hoje é heurística por regex para PDF, e
-  manual para imagem) — se quiser mais precisão, dá para plugar um modelo de visão.
+## Observações de segurança
+- As senhas são armazenadas com hash (bcrypt) — nunca em texto puro.
+- O login usa cookie de sessão (httpOnly), válido por 30 dias.
+- Para trocar o texto de erro genérico, redefinir senha de alguém ou remover
+  um usuário, use o **Shell** do Railway com `npx prisma studio` (abre uma
+  interface visual do banco) ou peça ajuda para ajustar isso no código.
